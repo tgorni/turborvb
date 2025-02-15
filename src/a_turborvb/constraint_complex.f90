@@ -112,26 +112,33 @@ subroutine constraint_complex(iessw, derl, n, nozero&
             ix = nozero(j) - (iy - 1)*ndim_detmat
             if (i .gt. 0) then
                 if (symmagp .and. yes_correct) then
-                    econf(1, 4*i - 3) = econf(1, 4*i - 3) + psip(4*j - 3) + psip(4*j - 1)
-                    econf(1, 4*i - 2) = econf(1, 4*i - 2) + psip(4*j - 2) + psip(4*j)
                     if (yes_hermite) then
+                        ! old (wrong? cauchy relation is not satisfied)
+                        !econf(1, 4*i - 3) = econf(1, 4*i - 3) + psip(4*j - 3) + psip(4*j - 1)
+                        !econf(1, 4*i - 2) = econf(1, 4*i - 2) + psip(4*j - 2) + psip(4*j)
+                        !econf(1, 4*i - 1) = econf(1, 4*i - 1) + psip(4*j - 2) - psip(4*j)
+                        !econf(1, 4*i) = econf(1, 4*i) - psip(4*j - 3) + psip(4*j - 1)
+
+                        ! fixed
+                        econf(1, 4*i - 3) = econf(1, 4*i - 3) + psip(4*j - 3) + psip(4*j - 1)
+                        econf(1, 4*i - 2) = econf(1, 4*i - 2) + psip(4*j - 2) - psip(4*j)
                         econf(1, 4*i - 1) = econf(1, 4*i - 1) + psip(4*j - 2) - psip(4*j)
-                        econf(1, 4*i) = econf(1, 4*i) - psip(4*j - 3) + psip(4*j - 1)
-                    else
+                        econf(1, 4*i) = econf(1, 4*i) - psip(4*j - 3) - psip(4*j - 1)
+
+                    else ! cauchy relation is ok
+                        econf(1, 4*i - 3) = econf(1, 4*i - 3) + psip(4*j - 3) + psip(4*j - 1)
+                        econf(1, 4*i - 2) = econf(1, 4*i - 2) + psip(4*j - 2) + psip(4*j)
                         econf(1, 4*i - 1) = econf(1, 4*i - 1) + psip(4*j - 2) + psip(4*j)
                         econf(1, 4*i) = econf(1, 4*i) - psip(4*j - 3) - psip(4*j - 1)
                     end if
-                else
-                    econf(1, 2*i - 1) = econf(1, 2*i - 1) + psip(2*j - 1)
-                    econf(1, 2*i) = econf(1, 2*i) + psip(2*j)
                 end if
             elseif (i .lt. 0) then
                 if (symmagp .and. yes_correct) then
                     if (yes_hermite) then
                         econf(1, -4*i - 3) = econf(1, -4*i - 3) - psip(4*j - 3) - psip(4*j - 1)
-                        econf(1, -4*i - 2) = econf(1, -4*i - 2) - psip(4*j - 2) - psip(4*j)
+                        econf(1, -4*i - 2) = econf(1, -4*i - 2) - psip(4*j - 2) + psip(4*j)
                         econf(1, -4*i - 1) = econf(1, -4*i - 1) - psip(4*j - 2) + psip(4*j)
-                        econf(1, -4*i) = econf(1, -4*i) + psip(4*j - 3) - psip(4*j - 1)
+                        econf(1, -4*i) = econf(1, -4*i) + psip(4*j - 3) + psip(4*j - 1)
                     else
                         econf(1, -4*i - 3) = econf(1, -4*i - 3) - psip(4*j - 3) - psip(4*j - 1)
                         econf(1, -4*i - 2) = econf(1, -4*i - 2) - psip(4*j - 2) - psip(4*j)
