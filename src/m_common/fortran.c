@@ -33,7 +33,7 @@ struct complex
     double im;
 };
 #ifdef _CUBLAS
-#include <cublas.h>
+#include <cublas_v2.h>
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cudasync_(void)
@@ -80,25 +80,31 @@ void cublas_sgemm_offload_(const char * transa, const char * transb, const int *
 #ifdef _CUBLAS
 void cublas_dgemm_offload_(const char * transa, const char * transb, const int * M, const int * N, const int * K, const double * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrB, const int * ldb, const double * beta, const devptr_t * devPtrC, const int * ldc)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrB, devPtrC)
     {
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrB_ = (double *) devPtrB;
     double * devPtrC_ = (double *) devPtrC;
-    cublasDgemm(* transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasDgemm_v2(handle, * transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_zgemm_offload_(const char * transa, const char * transb, const int * M, const int * N, const int * K, const cuDoubleComplex * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrB, const int * ldb, const cuDoubleComplex * beta, const devptr_t * devPtrC, const int * ldc)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrB, devPtrC)
     {
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrB_ = (cuDoubleComplex *) devPtrB;
     cuDoubleComplex * devPtrC_ = (cuDoubleComplex *) devPtrC;
-    cublasZgemm(* transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasZgemm_v2(handle, * transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
