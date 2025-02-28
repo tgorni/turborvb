@@ -44,37 +44,46 @@ void cudasync_(void)
 #ifdef _CUBLAS
 void cublas_dger_offload_(const int * M, const int * N, const double * alpha, const devptr_t * devPtrX, const int * incx, const devptr_t * devPtrY, const int * incy, const devptr_t * devPtrA, const int * lda)
 {
+    cublasHandle_t handle;
+    cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrX, devPtrY, devPtrA)
     {
     double * devPtrX_ = (double *) devPtrX;
     double * devPtrY_ = (double *) devPtrY;
     double * devPtrA_ = (double *) devPtrA;
-    cublasDger(* M, * N, * alpha, devPtrX_, * incx, devPtrY_, * incy, devPtrA_, * lda);
+    cublasDger(handle, * M, * N,  alpha, devPtrX_, * incx, devPtrY_, * incy, devPtrA_, * lda);
     }
+    cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_zgeru_offload_(const int * M, const int * N, const cuDoubleComplex * alpha, const devptr_t * devPtrX, const int * incx, const devptr_t * devPtrY, const int * incy, const devptr_t * devPtrA, const int * lda)
 {
+    cublasHandle_t handle;
+    cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrX, devPtrY, devPtrA)
     {
     cuDoubleComplex * devPtrX_ = (cuDoubleComplex *) devPtrX;
     cuDoubleComplex * devPtrY_ = (cuDoubleComplex *) devPtrY;
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
-    cublasZgeru(* M, * N, * alpha, devPtrX_, * incx, devPtrY_, * incy, devPtrA_, * lda);
+    cublasZgeru(handle, * M, * N, alpha, devPtrX_, * incx, devPtrY_, * incy, devPtrA_, * lda);
     }
+    cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_sgemm_offload_(const char * transa, const char * transb, const int * M, const int * N, const int * K, const float * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrB, const int * ldb, const float * beta, const devptr_t * devPtrC, const int * ldc)
 {
+    cublasHandle_t handle;
+    cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrB, devPtrC)
     {
     float * devPtrA_ = (float *) devPtrA;
     float * devPtrB_ = (float *) devPtrB;
     float * devPtrC_ = (float *) devPtrC;
-    cublasSgemm(* transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasSgemm(handle, * transa, * transb, * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
+    cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
@@ -87,7 +96,7 @@ void cublas_dgemm_offload_(const char * transa, const char * transb, const int *
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrB_ = (double *) devPtrB;
     double * devPtrC_ = (double *) devPtrC;
-    cublasDgemm_v2(handle, * transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasDgemm(handle, * transa, * transb, * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
 	cublasDestroy( handle );
 }
@@ -102,7 +111,7 @@ void cublas_zgemm_offload_(const char * transa, const char * transb, const int *
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrB_ = (cuDoubleComplex *) devPtrB;
     cuDoubleComplex * devPtrC_ = (cuDoubleComplex *) devPtrC;
-    cublasZgemm_v2(handle, * transa, * transb, * M, * N, * K, * alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasZgemm(handle, * transa, * transb, * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
 	cublasDestroy( handle );
 }
@@ -110,59 +119,74 @@ void cublas_zgemm_offload_(const char * transa, const char * transb, const int *
 #ifdef _CUBLAS
 void cublas_sgemv_offload_(const char * trans, const int * M, const int * N, const float * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrX, const int * incx, const float * beta, const devptr_t * devPtrY, const int * incy)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrX, devPtrY)
     {
     float * devPtrA_ = (float *) devPtrA;
     float * devPtrX_ = (float *) devPtrX;
     float * devPtrY_ = (float *) devPtrY;
-    cublasSgemv(* trans, * M, * N, * alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasSgemv(handle, * trans, * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_dgemv_offload_(const char * trans, const int * M, const int * N, const double * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrX, const int * incx, const double * beta, const devptr_t * devPtrY, const int * incy)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrX, devPtrY)
     {
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrX_ = (double *) devPtrX;
     double * devPtrY_ = (double *) devPtrY;
-    cublasDgemv(* trans, * M, * N, * alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasDgemv(handle, * trans, * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_zgemv_offload_(const char * trans, const int * M, const int * N, const cuDoubleComplex * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrX, const int * incx, const cuDoubleComplex * beta, const devptr_t * devPtrY, const int * incy)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrX, devPtrY)
     {
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrX_ = (cuDoubleComplex *) devPtrX;
     cuDoubleComplex * devPtrY_ = (cuDoubleComplex *) devPtrY;
-    cublasZgemv(* trans, * M, * N, * alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasZgemv(handle, * trans, * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_dtrsm_offload_(const char * side, const char * uplo, const char * transa, const char * diag, const int * M, const int * N, const double * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrB, const int * ldb)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrB)
     {
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrB_ = (double *) devPtrB;
-    cublasDtrsm(* side, * uplo, * transa, * diag, * M, * N, * alpha, devPtrA_, * lda, devPtrB_, * ldb);
+    cublasDtrsm(handle, * side, * uplo, * transa, * diag, * M, * N, alpha, devPtrA_, * lda, devPtrB_, * ldb);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUBLAS
 void cublas_ztrsm_offload_(const char * side, const char * uplo, const char * transa, const char * diag, const int * M, const int * N, const cuDoubleComplex * alpha, const devptr_t * devPtrA, const int * lda, const devptr_t * devPtrB, const int * ldb)
 {
+	cublasHandle_t handle;
+	cublasCreate( &handle );
     #pragma omp target data use_device_ptr(devPtrA, devPtrB)
     {
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrB_ = (cuDoubleComplex *) devPtrB;
-    cublasZtrsm(* side, * uplo, * transa, * diag, * M, * N, * alpha, devPtrA_, * lda, devPtrB_, * ldb);
+    cublasZtrsm(handle, * side, * uplo, * transa, * diag, * M, * N, alpha, devPtrA_, * lda, devPtrB_, * ldb);
     }
+	cublasDestroy( handle );
 }
 #endif /* _CUBLAS */
 #ifdef _CUSOLVER
