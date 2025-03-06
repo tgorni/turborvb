@@ -5839,8 +5839,8 @@ subroutine read_fort10_fast
         else
         write(unit, *) -1
         endif
-        elseif(abs(iesdr).le.3) then
-        write(unit, *) (vj(i), i = 1, abs(iesdr))
+!        elseif(abs(iesdr).le.3) then
+!        write(unit, *) (vj(i), i = 1, abs(iesdr))
                 else
                 if(symmagp) then
         write(unit, *) abs(niesd),(vj(i), i = 1, abs(niesd))
