@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <stdio.h>
 typedef size_t devptr_t;
 struct complex
 {
@@ -50,6 +51,7 @@ cublasOperation_t cublas_op_type(const char * blas_op_type)
     if (*blas_op_type == 't') return CUBLAS_OP_T;
     if (*blas_op_type == 'C') return CUBLAS_OP_C;
     if (*blas_op_type == 'c') return CUBLAS_OP_C;
+	printf("WARNING: unrecognized blas_op_type\n");
     return -1;
 }
 cublasSideMode_t cublas_side_type(const char * blas_side_type)
@@ -58,6 +60,7 @@ cublasSideMode_t cublas_side_type(const char * blas_side_type)
     if (*blas_side_type == 'r') return CUBLAS_SIDE_RIGHT;
     if (*blas_side_type == 'L') return CUBLAS_SIDE_LEFT;
     if (*blas_side_type == 'l') return CUBLAS_SIDE_LEFT;
+	printf("WARNING: unrecognized blas_side_type\n");
     return -1;
 }
 cublasFillMode_t cublas_fill_type(const char * blas_fill_type)
@@ -66,6 +69,7 @@ cublasFillMode_t cublas_fill_type(const char * blas_fill_type)
     if (*blas_fill_type == 'u') return CUBLAS_FILL_MODE_UPPER;
     if (*blas_fill_type == 'L') return CUBLAS_FILL_MODE_LOWER;
     if (*blas_fill_type == 'l') return CUBLAS_FILL_MODE_LOWER;
+	printf("WARNING: unrecognized blas_fill_type\n");
     return -1;
 }
 cublasDiagType_t cublas_diag_type(const char * blas_diag_type)
@@ -74,6 +78,7 @@ cublasDiagType_t cublas_diag_type(const char * blas_diag_type)
     if (*blas_diag_type == 'u') return CUBLAS_DIAG_UNIT;
     if (*blas_diag_type == 'N') return CUBLAS_DIAG_NON_UNIT;
     if (*blas_diag_type == 'n') return CUBLAS_DIAG_NON_UNIT;
+	printf("WARNING: unrecognized blas_diag_type\n");
     return -1;
 }
 #endif /* _CUBLAS */
