@@ -13,7 +13,7 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
            dger.f
            dger2.f
            getrfi.f
-           zgemm_tn.f
+           zgemm_tn.f90
            zgemv.f
            zgemvn.f
            zgemvt.f
