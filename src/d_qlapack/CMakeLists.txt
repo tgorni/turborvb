@@ -6,6 +6,7 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
 
     target_sources( ${LIBRARY}
         PRIVATE
+           dev_int.f90
            dgemm_tn.f
            dgemv.f
            dgemvn.f
