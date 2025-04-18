@@ -15,55 +15,55 @@
 ! Copyright (c) 2006-2010 The University of Colorado Denver.
 !                         All rights reserved.
 !
-   subroutine zgemm_(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
-      use device_utils
-      implicit none
-      complex*16 :: a(lda,*), b(ldb,*), c(ldc,*)
-      complex*16 :: alpha, beta
-      integer :: m, n, k, lda, ldb, ldc
-      character(len=1) :: trana, tranb
+subroutine zgemm_(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
+   use device_utils
+   implicit none
+   complex*16 :: a(lda,*), b(ldb,*), c(ldc,*)
+   complex*16 :: alpha, beta
+   integer :: m, n, k, lda, ldb, ldc
+   character(len=1) :: trana, tranb
 
-      if(n.eq.0.or.m.eq.0.or.k.eq.0) return
+   if(n.eq.0.or.m.eq.0.or.k.eq.0) return
 
 #ifndef _OFFLOAD
-      call zgemm(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
+   call zgemm(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
 #else
 #ifdef _CUBLAS
-      h = cublasGetHandle()
+   h = cublasGetHandle()
 !$omp target data use_device_ptr(a, b, c)
-      istat = cublasZgemm(h,cublas_op_type(trana),cublas_op_type(tranb),m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
+   istat = cublasZgemm(h,cublas_op_type(trana),cublas_op_type(tranb),m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
 !$omp end target data
-      istat = cudaDeviceSynchronize()
+   istat = cudaDeviceSynchronize()
 #endif
 #endif
 
-   end subroutine
-
-   subroutine ztrsm_(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-      use device_utils
-      implicit none
-      complex*16 :: alpha
-      complex*16 :: a(lda,*),b(ldb,*)
-      integer :: lda,ldb,m,n
-      character(len=1) :: side, uplo, transa, diag
+end subroutine
+!
+subroutine ztrsm_(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
+   use device_utils
+   implicit none
+   complex*16 :: alpha
+   complex*16 :: a(lda,*),b(ldb,*)
+   integer :: lda,ldb,m,n
+   character(len=1) :: side, uplo, transa, diag
 
 #ifndef _OFFLOAD
-      call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
+   call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 #else
 #ifdef _CUBLAS
-      h = cublasGetHandle()
+   h = cublasGetHandle()
 !$omp target data use_device_ptr(a, b)
-      istat = cublasZtrsm(h,cublas_side_type(side),cublas_fill_type(uplo),cublas_op_type(transa), &
-            & cublas_diag_type(diag),m,n,alpha,a,lda,b,ldb)
+   istat = cublasZtrsm(h,cublas_side_type(side),cublas_fill_type(uplo),cublas_op_type(transa), &
+         & cublas_diag_type(diag),m,n,alpha,a,lda,b,ldb)
 !$omp end target data
-      istat = cudaDeviceSynchronize()
+   istat = cudaDeviceSynchronize()
 #else
 !$omp target update from(a(1:lda,1:n))
 !$omp target update from(b(1:lda,1:n))
-      call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
+   call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 !$omp target update to(a(1:lda,1:n))
 !$omp target update to(b(1:lda,1:n))
 #endif
 #endif
 
-   end subroutine
+end subroutine

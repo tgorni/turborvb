@@ -15,9 +15,9 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
            dger2.f
            getrfi.f
            zgemm_tn.f90
-           zgemv.f
-           zgemvn.f
-           zgemvt.f
+           zgemv.f90
+           zgemvn.f90
+           zgemvt.f90
            zgeru.f
            zger2.f
            zdotc.f
