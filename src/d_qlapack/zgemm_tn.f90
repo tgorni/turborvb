@@ -16,21 +16,15 @@
 !                         All rights reserved.
 !
    subroutine zgemm_(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
-      use cudafor
-#endif
-      use dev_int
+      use device_utils
       implicit none
       complex*16 :: a(lda,*), b(ldb,*), c(ldc,*)
       complex*16 :: alpha, beta
       integer :: m, n, k, lda, ldb, ldc
       character(len=1) :: trana, tranb
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      type(cublasHandle) :: h
-#endif
-      integer :: istat
+
       if(n.eq.0.or.m.eq.0.or.k.eq.0) return
+
 #ifndef _OFFLOAD
       call zgemm(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
 #else
@@ -42,23 +36,17 @@
       istat = cudaDeviceSynchronize()
 #endif
 #endif
+
    end subroutine
 
    subroutine ztrsm_(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
-      use cudafor
-#endif
-      use dev_int
+      use device_utils
       implicit none
       complex*16 :: alpha
       complex*16 :: a(lda,*),b(ldb,*)
       integer :: lda,ldb,m,n
       character(len=1) :: side, uplo, transa, diag
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      type(cublasHandle) :: h
-#endif
-      integer :: istat
+
 #ifndef _OFFLOAD
       call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 #else
@@ -77,4 +65,5 @@
 !$omp target update to(b(1:lda,1:n))
 #endif
 #endif
+
    end subroutine

@@ -17,25 +17,20 @@
 !                         All rights reserved.
 !
    subroutine dgemm_tn(m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
-      use cudafor
-#endif
-      use dev_int
+      use device_utils
       use constants, only: yes_ontarget
       implicit none
       real*8 :: a(lda,*), b(ldb,*), c(ldc,*)
       real*8 :: alpha, beta
       integer :: m, n, k, lda, ldb, ldc
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      type(cublasHandle) :: h
-#endif
-      integer :: istat
+
       if(n.eq.0.or.m.eq.0.or.k.eq.0) return
+
       if(.not.yes_ontarget) then
           call dgemm('T','N',m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
           return
       end if
+
 #ifndef _OFFLOAD
       call dgemm('T','N',m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
 #else
@@ -57,21 +52,15 @@
    end subroutine
 
    subroutine dgemm_(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
-      use cudafor
-#endif
-      use dev_int
+      use device_utils
       implicit none
       real*8 :: a(lda,*), b(ldb,*), c(ldc,*)
       real*8 :: alpha, beta
       integer :: m, n, k, lda, ldb, ldc
       character(len=1) :: trana, tranb
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      type(cublasHandle) :: h
-#endif
-      integer :: istat
+
       if(n.eq.0.or.m.eq.0.or.k.eq.0) return
+
 #ifndef _OFFLOAD
       call dgemm(trana,tranb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc)
 #else
@@ -86,20 +75,13 @@
    end subroutine
 
    subroutine dtrsm_(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
-      use cudafor
-#endif
-      use dev_int
+      use device_utils
       implicit none
       real*8 :: alpha
       real*8 :: a(lda,*), b(ldb,*), d(lda,lda)
       integer :: lda, ldb, m, n
       character(len=1) :: side, uplo, transa, diag
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-      type(cublasHandle) :: h
-#endif
-      integer :: istat
+
 #ifndef _OFFLOAD
       call dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 #else
@@ -118,5 +100,6 @@
 !$omp target update to(B(1:lda,1:n))
 #endif
 #endif
+
    end subroutine
 

@@ -1,7 +1,11 @@
-module dev_int
+module device_utils
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
-      use cublas_v2
+   use cudafor
+   use cublas_v2
+
+   type(cublasHandle) :: h
+   integer :: istat
 #endif
 
 contains
