@@ -18,8 +18,8 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
            zgemv.f90
            zgemvn.f90
            zgemvt.f90
-           zgeru.f
-           zger2.f
+           zgeru.f90
+           zger2.f90
            zdotc.f
     )
     
