@@ -7,7 +7,7 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
     target_sources( ${LIBRARY}
         PRIVATE
            dev_int.f90
-           dgemm_tn.f
+           dgemm_tn.f90
            dgemv.f
            dgemvn.f
            dgemvt.f
