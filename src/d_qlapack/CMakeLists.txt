@@ -8,9 +8,9 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
         PRIVATE
            device_utils.f90
            dgemm_tn.f90
-           dgemv.f
-           dgemvn.f
-           dgemvt.f
+           dgemv.f90
+           dgemvn.f90
+           dgemvt.f90
            dger.f
            dger2.f
            getrfi.f
