@@ -25,11 +25,11 @@ macro(SET_NVHPC_FORTRAN_COMPILER)
                         EXECUTABLES_P_L
                         LIBRARIES_S_L
                         LIBRARIES_P_L)
-    if(CUDAToolkit_FOUND)
-      target_link_libraries( ${EXE} PUBLIC CUDA::cudart)
-      target_link_libraries( ${EXE} PUBLIC CUDA::cublas)
-      target_link_libraries( ${EXE} PUBLIC CUDA::cusolver)
-    endif()
+    # if(CUDAToolkit_FOUND)
+    #   target_link_libraries( ${EXE} PUBLIC CUDA::cudart)
+    #   target_link_libraries( ${EXE} PUBLIC CUDA::cublas)
+    #   target_link_libraries( ${EXE} PUBLIC CUDA::cusolver)
+    # endif()
 
     if(EXT_GPU)
       if( NOT NATIVE_OMP_B )
