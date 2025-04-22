@@ -1,16 +1,32 @@
 module device_utils
 
-#if defined(_OFFLOAD) && defined(_CUBLAS)
-   use cudafor
-   use cublas_v2
+#if defined(_OFFLOAD) 
 
-   type(cublasHandle) :: h
+   use cudafor
+#if defined(_CUBLAS)
+   use cublas_v2
+#endif
+#if defined(_CUSOLVER)
+   use cusolverDn
+   use allio, only: handle, &
+                    dev_dgetrf_workspace, &
+                    dev_dgetri_workspace, &
+                    dev_zgetrf_workspace, &
+                    dev_zgetri_workspace, &
+                    dev_Info
+   ! TG: import only necessary workspace?
+#endif
+
    integer :: istat
+#if defined(_CUBLAS)
+   type(cublasHandle) :: h
+#endif
+
 #endif
 
 contains
 
-#if defined(_OFFLOAD) && defined(_CUBLAS)
+#if defined(_OFFLOAD) 
    integer function cublas_op_type(blas_op_type)
       implicit none
       character(len=1), intent(in) :: blas_op_type
