@@ -78,32 +78,9 @@ contains
       istat = cusolverDnDestroy(handle) 
    end subroutine
 
-   subroutine cusolver_dgetrf_buffersize(handle, istat, m, n, a, lda, workspace)
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      integer :: m, n, lda
-      real(8), dimension(lda,*) :: a
-      integer :: workspace
-!$omp target data use_device_ptr(a)
-      istat = cusolverDnDgetrf_bufferSize(handle, m, n, a, lda, workspace)
-!$omp end target data
-   end subroutine
-
-   subroutine cusolver_zgetrf_buffersize(handle, istat, m, n, a, lda, workspace)
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      integer :: m, n, lda
-      complex(8), dimension(lda,*) :: a
-      integer :: workspace
-!$omp target data use_device_ptr(a)
-      istat = cusolverDnZgetrf_bufferSize(handle, m, n, a, lda, workspace)
-!$omp end target data
-   end subroutine
-
 #endif
 
 #endif
 
 end module
+

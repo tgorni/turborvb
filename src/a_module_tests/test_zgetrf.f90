@@ -17,8 +17,7 @@ program test_zgetrf
 
 #if defined(_OFFLOAD) && defined(_CUSOLVER)
     use device_utils, only: handle, dev_zgetrf_workspace, dev_Info&
-                          &, cusolver_handle_init, cusolver_handle_destroy&
-                          &, cusolver_zgetrf_buffersize
+                          &, cusolver_handle_init, cusolver_handle_destroy
 #endif
 
     implicit none

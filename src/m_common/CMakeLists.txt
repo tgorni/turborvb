@@ -117,7 +117,6 @@ if( ${LIBRARY} MATCHES common-.* )
         random.f90
         convertdec.f90
         io.c
-        fortran.c
         randomnumber.c
         fort11_io.f90
         read_pseudo.f90

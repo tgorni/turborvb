@@ -196,3 +196,36 @@ subroutine zgetri_(n, a, lda, ipiv, work, lwork, info)
 #endif
 
 end subroutine zgetri_
+
+   subroutine cusolver_dgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
+      use device_utils
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istatus
+      integer :: m, n, lda
+      real*8, dimension(lda,*) :: a
+      integer :: workspace
+!$omp target data use_device_ptr(a)
+      istatus = cusolverDnDgetrf_bufferSize(handle, m, n, a, lda, workspace)
+!$omp end target data
+   end subroutine
+
+   subroutine cusolver_zgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
+      use device_utils
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istatus
+      integer :: m, n, lda
+      complex*16, dimension(lda,*) :: a
+      integer :: workspace
+!$omp target data use_device_ptr(a)
+      istatus = cusolverDnZgetrf_bufferSize(handle, m, n, a, lda, workspace)
+!$omp end target data
+   end subroutine
+
+
+
+
+
+
+

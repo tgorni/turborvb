@@ -33,8 +33,7 @@ program main
     use device_utils, only: handle, ldworkspace, lzworkspace, dev_info,  &
                             dev_dgetrf_workspace, dev_zgetrf_workspace,  &
                             dev_dgetri_workspace, dev_zgetri_workspace,  &
-                            cusolver_handle_init, cusolver_handle_destroy, &
-                            cusolver_dgetrf_buffersize, cusolver_zgetrf_buffersize 
+                            cusolver_handle_init, cusolver_handle_destroy
 
     real*8 timeppp, drand1, inittime, enercont, mapping, enthalpy        &
            &, weight_vir, costwnn, costexpn, coeff_nw, enerold           &
