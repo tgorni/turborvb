@@ -30,6 +30,11 @@ program main
     use mpiio, only: mpiio_file_reset_view, mpiio_file_set_zero          &
            &, mpiio_file_get_disp, mpiio_file_create_view
 #endif
+    use device_utils, only: handle, ldworkspace, lzworkspace, dev_info,  &
+                            dev_dgetrf_workspace, dev_zgetrf_workspace,  &
+                            dev_dgetri_workspace, dev_zgetri_workspace,  &
+                            cusolver_handle_init, cusolver_handle_destroy, &
+                            cusolver_dgetrf_buffersize, cusolver_zgetrf_buffersize 
 
     real*8 timeppp, drand1, inittime, enercont, mapping, enthalpy        &
            &, weight_vir, costwnn, costexpn, coeff_nw, enerold           &
@@ -298,23 +303,13 @@ program main
         lzworkspace = 1
         !
         if (ipc .eq. 1) then
-#ifdef RISC
-            call cusolver_dgetrf_buffersize_&
-                &(handle, stat, nelup, nelup, psip, nelup, ldworkspace)
-#else
             call cusolver_dgetrf_buffersize&
                 &(handle, stat, nelup, nelup, psip, nelup, ldworkspace)
-#endif
             allocate (dev_dgetri_workspace(nelup, nelup))
             allocate (dev_zgetri_workspace(1, 1))
         else
-#ifdef RISC
-            call cusolver_zgetrf_buffersize_&
-                &(handle, stat, nelup, nelup, psip, nelup, lzworkspace)
-#else
             call cusolver_zgetrf_buffersize&
                 &(handle, stat, nelup, nelup, psip, nelup, lzworkspace)
-#endif
             allocate (dev_dgetri_workspace(1, 1))
             allocate (dev_zgetri_workspace(nelup, nelup))
         end if
@@ -5490,11 +5485,7 @@ contains
         if (molopt .ne. 0) yesmin_read = .true.
 
 #ifdef _CUSOLVER
-#ifdef RISC
-        call cusolver_handle_init_(handle)
-#else
         call cusolver_handle_init(handle)
-#endif
 #endif
 
 #ifdef PARALLEL
@@ -8731,11 +8722,7 @@ contains
         iend = i_main
 
 #ifdef _CUSOLVER
-#ifdef RISC
-        call cusolver_handle_destroy_(handle)
-#else
         call cusolver_handle_destroy(handle)
-#endif
 #endif
 
 #ifdef PARALLEL

@@ -16,7 +16,9 @@
 program test_zgetrf
 
 #if defined(_OFFLOAD) && defined(_CUSOLVER)
-    use allio, only: handle, dev_zgetrf_workspace, dev_Info
+    use device_utils, only: handle, dev_zgetrf_workspace, dev_Info&
+                          &, cusolver_handle_init, cusolver_handle_destroy&
+                          &, cusolver_zgetrf_buffersize
 #endif
 
     implicit none
@@ -39,22 +41,12 @@ program test_zgetrf
 
 #if defined(_OFFLOAD) && defined(_CUSOLVER)
     lworkspace = 1
-#ifdef RISC
-    call cusolver_handle_init_(handle)
-#else
     call cusolver_handle_init(handle)
-#endif
 
     allocate (dummy(s, s))
 !$omp target data map(alloc:dummy)
 
-#ifdef RISC
-    call cusolver_zgetrf_buffersize_(handle, stat, s, s&
-                                      &, dummy, s, lworkspace)
-#else
     call cusolver_zgetrf_buffersize(handle, stat, s, s&
-                                      &, dummy, s, lworkspace)
-#endif
 
 !$omp end target data
     deallocate (dummy)
@@ -150,11 +142,7 @@ program test_zgetrf
 
 #if defined(_OFFLOAD) && defined(_CUSOLVER)
 !$omp end target data
-#ifdef RISC
-    call cusolver_handle_destroy_(handle)
-#else
     call cusolver_handle_destroy(handle)
-#endif
 #endif
 
     deallocate (A, ipiv, temp, upper, lower, C, helper_r, helper_c)

@@ -126,13 +126,6 @@ module allio
         divide_tpar, multiply_tpar, n_sigmas_tpar
     !end added Andrea Tirelli
 
-    integer*8 :: handle
-    integer*4 ldworkspace, lzworkspace, dev_Info(1)
-    real*8, allocatable, dimension(:) :: dev_dgetrf_workspace
-    complex*16, allocatable, dimension(:) :: dev_zgetrf_workspace
-    real*8, allocatable, dimension(:, :) :: dev_dgetri_workspace
-    complex*16, allocatable, dimension(:, :) :: dev_zgetri_workspace
-
     real*8 deriv1, deriv2, deriv3, pulay1, pulay2, pulay3, scalecell(3)&
    &, epsder, scale_grad, norm_corr
 

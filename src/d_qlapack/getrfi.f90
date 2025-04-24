@@ -37,7 +37,7 @@ subroutine dgetrf_(m, n, a, lda, ipiv, info)
 !$omp end target data
    istat = cudaDeviceSynchronize()
 !$omp target update from(dev_Info)
-   info = dev_Info(1)
+   info = dev_Info
 #endif
 #else
    call dgetrf(m, n, a, lda, ipiv, info)
@@ -66,7 +66,7 @@ subroutine zgetrf_(m, n, a, lda, ipiv, info)
 !$omp end target data
    istat = cudaDeviceSynchronize()
 !$omp target update from(dev_Info)
-   info = dev_Info(1)
+   info = dev_Info
 #endif
 #else
     call zgetrf(m, n, a, lda, ipiv, info)
@@ -128,7 +128,7 @@ subroutine dgetri_(n, a, lda, ipiv, work, lwork, info)
    end do
 !$omp end target teams distribute parallel do
 !$omp target update from(dev_Info)
-   info = dev_Info(1)
+   info = dev_Info
 #else
    call dgetri(n, a, lda, ipiv, work, lwork, info)
 #endif
@@ -146,7 +146,7 @@ end subroutine dgetri_
 subroutine zgetri_(n, a, lda, ipiv, work, lwork, info)
    use device_utils
    implicit none
-   integer*4 :: n, lda, lwork
+   integer*4 :: n, lda, lwork, info
    integer*4, dimension(*) :: ipiv
    complex*16, dimension(*) :: work
    complex*16, dimension(lda, n) :: a
@@ -190,7 +190,7 @@ subroutine zgetri_(n, a, lda, ipiv, work, lwork, info)
    end do
 !$omp end target teams distribute parallel do
 !$omp target update from(dev_Info)
-   info = dev_Info(1)
+   info = dev_Info
 #else
    call zgetri(n, a, lda, ipiv, work, lwork, info)
 #endif

@@ -40,9 +40,12 @@ program readforward
             &, commcolrep_mpi, nk, mcol, chara, charaq, wkp, molyes, add_onebody2det&
             &, ndiff, vpotsav_ee
 #ifdef _OFFLOAD
-    use allio, only: handle, dev_dgetri_workspace, dev_zgetri_workspace, ipsip, psip, jasmat, muj_c &
-    &, jasmat_c, eagp_pfaff, winv, winvj, agp, agpn, ainv, winvbar, winvjbar, ainvup&
-    &, ainvdo, ldworkspace, lzworkspace, dev_info, dev_dgetrf_workspace, dev_zgetrf_workspace
+    use device_utils, only: handle, dev_dgetri_workspace, dev_zgetri_workspace, &
+                          & ldworkspace, lzworkspace, dev_info, dev_dgetrf_workspace, &
+                          & dev_zgetrf_workspace, cusolver_handle_init, cusolver_handle_destroy, &
+                          & cusolver_dgetrf_buffersize, cusolver_zgetrf_buffersize
+    use allio, only: ipsip, psip, jasmat, muj_c , jasmat_c, eagp_pfaff, winv, winvj, &
+                   & agp, agpn, ainv, winvbar, winvjbar, ainvup, ainvdo
 #endif
     use cell
     use berry_phase
@@ -593,11 +596,7 @@ program readforward
 
     end if
 #ifdef _CUSOLVER
-#ifdef RISC
-    call cusolver_handle_init_(handle)
-#else
     call cusolver_handle_init(handle)
-#endif
 #endif
 #ifdef _OFFLOAD
     yes_ontarget = .false. ! everything should be back to cpu no matter how
@@ -613,19 +612,11 @@ program readforward
         lzworkspace = 1
         !
         if (ipc .eq. 1) then
-#ifdef RISC
-            call cusolver_dgetrf_buffersize_(handle, stat, nelup, nelup, psip, nelup, ldworkspace)
-#else
             call cusolver_dgetrf_buffersize(handle, stat, nelup, nelup, psip, nelup, ldworkspace)
-#endif
             allocate (dev_dgetri_workspace(nelup, nelup))
             allocate (dev_zgetri_workspace(1, 1))
         else
-#ifdef RISC
-            call cusolver_zgetrf_buffersize_(handle, stat, nelup, nelup, psip, nelup, lzworkspace)
-#else
             call cusolver_zgetrf_buffersize(handle, stat, nelup, nelup, psip, nelup, lzworkspace)
-#endif
             allocate (dev_dgetri_workspace(1, 1))
             allocate (dev_zgetri_workspace(nelup, nelup))
         end if

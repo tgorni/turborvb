@@ -6,7 +6,6 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
 
     target_sources( ${LIBRARY}
         PRIVATE
-           device_utils.f90
            dgemm_tn.f90
            dgemv.f90
            dgemvn.f90

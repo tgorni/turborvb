@@ -54,6 +54,7 @@ if( ${LIBRARY} MATCHES common-.* )
         cell.f90
         constants.f90
         damping.f90
+        device_utils.f90
         dielectric.f90
         evaluate_invariant.f90
         ewald.f90
