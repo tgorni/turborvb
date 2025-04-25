@@ -42,7 +42,7 @@ program readforward
 #ifdef _OFFLOAD
     use device_utils, only: handle, dev_dgetri_workspace, dev_zgetri_workspace, &
                           & ldworkspace, lzworkspace, dev_info, dev_dgetrf_workspace, &
-                          & dev_zgetrf_workspace, cusolver_handle_init, cusolver_handle_destroy
+                          & dev_zgetrf_workspace
     use allio, only: ipsip, psip, jasmat, muj_c , jasmat_c, eagp_pfaff, winv, winvj, &
                    & agp, agpn, ainv, winvbar, winvjbar, ainvup, ainvdo
 #endif

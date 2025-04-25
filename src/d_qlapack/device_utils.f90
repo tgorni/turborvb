@@ -62,24 +62,6 @@ contains
       if (blas_diag_type=='N') cublas_diag_type = CUBLAS_DIAG_NON_UNIT
    end function
 
-#if defined(_CUSOLVER) 
-
-   subroutine cusolver_handle_init(handle)
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      istat = cusolverDnCreate(handle) 
-   end subroutine
-
-   subroutine cusolver_handle_destroy(handle)
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      istat = cusolverDnDestroy(handle) 
-   end subroutine
-
-#endif
-
 #endif
 
 end module

@@ -20,6 +20,8 @@ foreach( LIBRARY IN LISTS LIBRARIES_S_L
            zgeru.f90
            zger2.f90
            zdotc.f
+        PUBLIC
+           device_utils.f90
     )
     
   string(REGEX REPLACE "^qlapack" "common" COMMON_LIBRARY_TO_LINK ${LIBRARY})

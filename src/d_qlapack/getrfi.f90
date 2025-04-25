@@ -197,8 +197,24 @@ subroutine zgetri_(n, a, lda, ipiv, work, lwork, info)
 
 end subroutine zgetri_
 
+   subroutine cusolver_handle_init(handle)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istat
+      istat = cusolverDnCreate(handle) 
+   end subroutine
+
+   subroutine cusolver_handle_destroy(handle)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istat
+      istat = cusolverDnDestroy(handle) 
+   end subroutine
+
    subroutine cusolver_dgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
-      use device_utils
+      use cusolverDn
       implicit none
       type(cusolverDnHandle) :: handle
       integer :: istatus
@@ -211,7 +227,7 @@ end subroutine zgetri_
    end subroutine
 
    subroutine cusolver_zgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
-      use device_utils
+      use cusolverDn
       implicit none
       type(cusolverDnHandle) :: handle
       integer :: istatus

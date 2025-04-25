@@ -16,9 +16,7 @@
 program test_dgetrfi
 
 #if defined(_OFFLOAD) && defined(_CUSOLVER)
-    use device_utils, only: handle, dev_dgetrf_workspace&
-                          &, dev_dgetri_workspace, dev_Info&
-                          &, cusolver_handle_init, cusolver_handle_destroy
+    use device_utils
 #endif
 
     implicit none
