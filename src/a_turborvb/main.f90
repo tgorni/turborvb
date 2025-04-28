@@ -30,9 +30,9 @@ program main
     use mpiio, only: mpiio_file_reset_view, mpiio_file_set_zero          &
            &, mpiio_file_get_disp, mpiio_file_create_view
 #endif
-    use device_utils, only: handle, ldworkspace, lzworkspace, dev_info,  &
-                            dev_dgetrf_workspace, dev_zgetrf_workspace,  &
-                            dev_dgetri_workspace, dev_zgetri_workspace
+#if defined(_OFFLOAD)
+    use device_utils
+#endif
 
     real*8 timeppp, drand1, inittime, enercont, mapping, enthalpy        &
            &, weight_vir, costwnn, costexpn, coeff_nw, enerold           &

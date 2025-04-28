@@ -27,9 +27,15 @@
 subroutine dgetrf_(m, n, a, lda, ipiv, info)
    use device_utils
    implicit none
-   integer*4   :: m,stat, n, lda, info, lipiv,i,j
+   integer :: m,stat, n, lda, info, lipiv,i,j
    real*8, dimension(lda,*) :: a
-   integer*4, dimension(*)  :: ipiv
+   integer, dimension(*)  :: ipiv
+   integer :: ii, jj
+   do ii = 1, lda
+       do jj = 1, lda
+          write(*,'("dgetrf_: a = ",2i8,3f24.16)'), ii, jj, a(ii,jj)
+       enddo
+   enddo
 #ifdef _CUSOLVER
 #ifdef _OFFLOAD
 !$omp target data use_device_ptr(a, dev_dgetrf_workspace, ipiv, dev_Info)
@@ -196,52 +202,3 @@ subroutine zgetri_(n, a, lda, ipiv, work, lwork, info)
 #endif
 
 end subroutine zgetri_
-
-   subroutine cusolver_handle_init(handle)
-      use cusolverDn
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      istat = cusolverDnCreate(handle) 
-   end subroutine
-
-   subroutine cusolver_handle_destroy(handle)
-      use cusolverDn
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istat
-      istat = cusolverDnDestroy(handle) 
-   end subroutine
-
-   subroutine cusolver_dgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
-      use cusolverDn
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istatus
-      integer :: m, n, lda
-      real*8, dimension(lda,*) :: a
-      integer :: workspace
-!$omp target data use_device_ptr(a)
-      istatus = cusolverDnDgetrf_bufferSize(handle, m, n, a, lda, workspace)
-!$omp end target data
-   end subroutine
-
-   subroutine cusolver_zgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
-      use cusolverDn
-      implicit none
-      type(cusolverDnHandle) :: handle
-      integer :: istatus
-      integer :: m, n, lda
-      complex*16, dimension(lda,*) :: a
-      integer :: workspace
-!$omp target data use_device_ptr(a)
-      istatus = cusolverDnZgetrf_bufferSize(handle, m, n, a, lda, workspace)
-!$omp end target data
-   end subroutine
-
-
-
-
-
-
-

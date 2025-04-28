@@ -64,5 +64,52 @@ contains
 
 #endif
 
+#ifdef _CUSOLVER
+
+   subroutine cusolver_handle_init(handle)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istat
+      istat = cusolverDnCreate(handle) 
+   end subroutine
+
+   subroutine cusolver_handle_destroy(handle)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istat
+      istat = cusolverDnDestroy(handle) 
+   end subroutine
+
+   subroutine cusolver_dgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istatus
+      integer :: m, n, lda
+      real*8, dimension(lda,*) :: a
+      integer :: workspace
+!$omp target data use_device_ptr(a)
+      istatus = cusolverDnDgetrf_bufferSize(handle, m, n, a, lda, workspace)
+!$omp end target data
+   end subroutine
+
+#endif
+
 end module
 
+#ifdef _CUSOLVER
+   subroutine cusolver_zgetrf_buffersize(handle, istatus, m, n, a, lda, workspace)
+      use cusolverDn
+      implicit none
+      type(cusolverDnHandle) :: handle
+      integer :: istatus
+      integer :: m, n, lda
+      complex*16, dimension(lda,*) :: a
+      integer :: workspace
+!$omp target data use_device_ptr(a)
+      istatus = cusolverDnZgetrf_bufferSize(handle, m, n, a, lda, workspace)
+!$omp end target data
+   end subroutine
+#endif
