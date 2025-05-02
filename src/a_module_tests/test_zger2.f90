@@ -31,6 +31,14 @@ program test_zger2
     yes_ontarget = .true.
 #endif
 
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+    call cublas_handle_init_()
+#else
+    call cublas_handle_init()
+#endif
+#endif
+
     read (*, *) s
 
     allocate (A(s, s))
