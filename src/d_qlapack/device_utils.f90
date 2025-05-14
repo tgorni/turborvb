@@ -2,7 +2,7 @@ module device_utils
 
 #if defined(_OFFLOAD) 
 
-   use cudafor
+   use cudafor, only: cudaDeviceSynchronize 
 
 #if defined(_CUBLAS)
    use cublas_v2
