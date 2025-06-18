@@ -109,6 +109,13 @@ program main
     ! 4) generate scratch files for continuation.
     call Initializeall
     !
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+        call cublas_handle_init_()
+#else
+        call cublas_handle_init()
+#endif
+#endif
     ! deallocate useless variables allocated for QMC
     ! small reallocation just to be safe
     !

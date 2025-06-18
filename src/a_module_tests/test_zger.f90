@@ -27,6 +27,14 @@ program test_zgeru
     real*8 :: one = 1.d0, zero = 0.d0
     integer :: s, ii, jj
 
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+    call cublas_handle_init_()
+#else
+    call cublas_handle_init()
+#endif
+#endif
+
     read (*, *) s
 
     allocate (A(s, s))

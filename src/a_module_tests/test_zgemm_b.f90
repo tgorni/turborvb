@@ -26,6 +26,14 @@ program test_zgemm_b
     character(len=1) :: first, second
     character(len=100) :: message, str_tmp1, str_tmp2
 
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+    call cublas_handle_init_()
+#else
+    call cublas_handle_init()
+#endif
+#endif
+
     ! gen = 1 : Generate matrices
     ! gen = 0 : Compare matrices
 

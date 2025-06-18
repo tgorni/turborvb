@@ -592,6 +592,15 @@ program readforward
 #endif
 
     end if
+
+#ifdef _CUBLAS
+#ifdef RISC
+    call cublas_handle_init_()
+#else
+    call cublas_handle_init()
+#endif
+#endif
+
 #ifdef _CUSOLVER
 #ifdef RISC
     call cusolver_handle_init_(handle)
