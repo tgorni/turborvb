@@ -80,6 +80,14 @@ program test_dgemm_b
     CB_i = CB
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+        call cublas_handle_init_()
+#else
+        call cublas_handle_init()
+#endif
+#endif
+
+#if defined(_OFFLOAD) && defined(_CUBLAS)
 !$omp target data map(to:A,B)
 !$omp target data map(tofrom:AB,BB,CB)
 #endif
