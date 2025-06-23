@@ -18,6 +18,7 @@ program main
     use setup
     use freeelmod_complex, only: self_consistent_run
     use parallel_module, only: old_threads, setup_para
+    use allio, only: cublas_handle
     implicit none
     integer, external :: omp_get_max_threads
     character(lchlen) :: path
@@ -111,9 +112,9 @@ program main
     !
 #if defined(_OFFLOAD) && defined(_CUBLAS)
 #ifdef RISC
-        call cublas_handle_init_()
+        call cublas_handle_init_(cublas_handle)
 #else
-        call cublas_handle_init()
+        call cublas_handle_init(cublas_handle)
 #endif
 #endif
     ! deallocate useless variables allocated for QMC

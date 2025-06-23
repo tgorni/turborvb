@@ -5491,9 +5491,9 @@ contains
 
 #ifdef _CUBLAS
 #ifdef RISC
-        call cublas_handle_init_()
+        call cublas_handle_init_(cublas_handle)
 #else
-        call cublas_handle_init()
+        call cublas_handle_init(cublas_handle)
 #endif
 #endif
 
@@ -8740,9 +8740,9 @@ contains
 
 #ifdef _CUBLAS
 #ifdef RISC
-        call cublas_handle_destroy_()
+        call cublas_handle_destroy_(cublas_handle)
 #else
-        call cublas_handle_destroy()
+        call cublas_handle_destroy(cublas_handle)
 #endif
 #endif
 

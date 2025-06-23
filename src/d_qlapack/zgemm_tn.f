@@ -19,6 +19,7 @@ cTL off
       SUBROUTINE ZGEMM_TN(M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 c
       USE constants, ONLY: yes_ontarget
+      USE allio, ONLY: cublas_handle
 c
       IMPLICIT NONE
 c
@@ -38,11 +39,11 @@ c
 #else
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_zgemm_offload_('T','N',M,N,K,alpha,A,LDA
+      CALL cublas_zgemm_offload_(cublas_handle,'T','N',M,N,K,alpha,A,LDA
      +                          ,b,LDB,beta,c,LDC)
       CALL cudasync_
 #else
-      CALL cublas_zgemm_offload('T','N',M,N,K,alpha,A,LDA
+      CALL cublas_zgemm_offload(cublas_handle,'T','N',M,N,K,alpha,A,LDA
      +                         ,b,LDB,beta,c,LDC)
       CALL cudasync
 #endif
@@ -60,6 +61,8 @@ c
 
       SUBROUTINE ZGEMM_(TRANA,TRANB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 c
+      USE allio, ONLY: cublas_handle
+c
       IMPLICIT NONE
 c
       COMPLEX*16 :: A(LDA,*), B(LDB,*), C(LDC,*)
@@ -74,12 +77,12 @@ c
 #else
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_zgemm_offload_(TRANA,TRANB,M,N,K,alpha,A,LDA
-     +                          ,b,LDB,beta,c,LDC)
+      CALL cublas_zgemm_offload_(cublas_handle,TRANA,TRANB,M,N,K,alpha
+     +                          ,A,LDA,b,LDB,beta,c,LDC)
       CALL cudasync_
 #else
-      CALL cublas_zgemm_offload(TRANA,TRANB,M,N,K,alpha,A,LDA
-     +                         ,b,LDB,beta,c,LDC)
+      CALL cublas_zgemm_offload(cublas_handle,TRANA,TRANB,M,N,K,alpha
+     +                         ,A,LDA,b,LDB,beta,c,LDC)
       CALL cudasync
 #endif
 #endif
@@ -89,6 +92,8 @@ c
       END
 
       SUBROUTINE ZTRSM_(SIDE,UPLO,TRANSA,DIAG,M,N,ALPHA,A,LDA,B,LDB)
+c
+      USE allio, ONLY: cublas_handle
 c
       IMPLICIT NONE
 c
@@ -102,12 +107,12 @@ c
 #else
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_ztrsm_offload_(SIDE,UPLO,TRANSA,DIAG,M,N,ALPHA
-     +                          ,A,LDA,B,LDB)
+      CALL cublas_ztrsm_offload_(cublas_handle,SIDE,UPLO,TRANSA,DIAG,M,N
+     +                          ,ALPHA,A,LDA,B,LDB)
       CALL cudasync_
 #else
-      CALL cublas_ztrsm_offload(SIDE,UPLO,TRANSA,DIAG,M,N,ALPHA
-     +                         ,A,LDA,B,LDB)
+      CALL cublas_ztrsm_offload(cublas_handle,SIDE,UPLO,TRANSA,DIAG,M,N
+     +                         ,ALPHA,A,LDA,B,LDB)
       CALL cudasync
 #endif
 #else

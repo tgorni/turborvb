@@ -14,6 +14,7 @@
 ! along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 program test_dgemm
+    use allio, only: cublas_handle
     implicit none
 
     real*8, allocatable, dimension(:, :) :: A, B, C, C_orig
@@ -61,9 +62,9 @@ program test_dgemm
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
 #ifdef RISC
-        call cublas_handle_init_()
+        call cublas_handle_init_(cublas_handle)
 #else
-        call cublas_handle_init()
+        call cublas_handle_init(cublas_handle)
 #endif
 #endif
 

@@ -14,6 +14,7 @@
 ! along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 program test_zgemm_b
+    use allio, only: cublas_handle
     implicit none
 
     complex*16, allocatable, dimension(:, :) :: A, B, AB, BB, CB, CB_i
@@ -28,9 +29,9 @@ program test_zgemm_b
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
 #ifdef RISC
-    call cublas_handle_init_()
+    call cublas_handle_init_(cublas_handle)
 #else
-    call cublas_handle_init()
+    call cublas_handle_init(cublas_handle)
 #endif
 #endif
 

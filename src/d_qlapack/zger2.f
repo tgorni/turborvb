@@ -18,6 +18,7 @@ cTL off
 *
       SUBROUTINE ZGER2(M,N,ALPHA,X,LDX,Y,LDY,A,LDA)
       USE constants,  ONLY: yes_ontarget
+      USE allio,      ONLY: cublas_handle
 
       IMPLICIT NONE
 c
@@ -42,12 +43,12 @@ c
 #ifdef _OFFLOAD
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_zgemm_offload_('N','T',M,N,2,alpha,X,LDX,Y
-     +                          ,LDY,ONE,A,LDA)
+      CALL cublas_zgemm_offload_(cublas_handle,'N','T',M,N,2,alpha,X,LDX
+     +                          Y,,LDY,ONE,A,LDA)
       CALL cudasync_
 #else
-      CALL cublas_zgemm_offload('N','T',M,N,2,alpha,X,LDX,Y
-     +                         ,LDY,ONE,A,LDA)
+      CALL cublas_zgemm_offload(cublas_handle,'N','T',M,N,2,alpha,X,LDX
+     +                         ,Y,LDY,ONE,A,LDA)
       CALL cudasync
 #endif
 #else

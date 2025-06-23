@@ -40,7 +40,7 @@ program readforward
             &, commcolrep_mpi, nk, mcol, chara, charaq, wkp, molyes, add_onebody2det&
             &, ndiff, vpotsav_ee
 #ifdef _OFFLOAD
-    use allio, only: handle, dev_dgetri_workspace, dev_zgetri_workspace, ipsip, psip, jasmat, muj_c &
+    use allio, only: cublas_handle, handle, dev_dgetri_workspace, dev_zgetri_workspace, ipsip, psip, jasmat, muj_c &
     &, jasmat_c, eagp_pfaff, winv, winvj, agp, agpn, ainv, winvbar, winvjbar, ainvup&
     &, ainvdo, ldworkspace, lzworkspace, dev_info, dev_dgetrf_workspace, dev_zgetrf_workspace
 #endif
@@ -595,9 +595,9 @@ program readforward
 
 #ifdef _CUBLAS
 #ifdef RISC
-    call cublas_handle_init_()
+    call cublas_handle_init_(cublas_handle)
 #else
-    call cublas_handle_init()
+    call cublas_handle_init(cublas_handle)
 #endif
 #endif
 

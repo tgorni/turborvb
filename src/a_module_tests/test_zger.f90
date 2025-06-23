@@ -16,7 +16,7 @@
 program test_zgeru
 
 #if defined(_OFFLOAD)
-    use allio, only: yes_on_target
+    use allio, only: yes_on_target, cublas_handle
 #endif
 
     implicit none
@@ -29,9 +29,9 @@ program test_zgeru
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
 #ifdef RISC
-    call cublas_handle_init_()
+    call cublas_handle_init_(cublas_handle)
 #else
-    call cublas_handle_init()
+    call cublas_handle_init(cublas_handle)
 #endif
 #endif
 
