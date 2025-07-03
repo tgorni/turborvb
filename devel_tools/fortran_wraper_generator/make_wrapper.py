@@ -104,8 +104,6 @@ if b_cusolver:
     add_cusolver_handle_destroy(cw)
     cw.end_if_def()
 
-    cw.start_if_def(f"_CUSOLVER")
-
     for entry in cusolver:
         add_this(cw, entry)
 

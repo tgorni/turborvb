@@ -244,7 +244,6 @@ void cusolver_handle_destroy_(long int * handle)
 }
 #endif /* _CUSOLVER */
 #ifdef _CUSOLVER
-#ifdef _CUSOLVER
 void cusolver_dgetrf_buffersize_(const long int * handle,  int * status,  int * M,  int * N,  void * A,  int * lda,  int * workspace)
 {
     cusolverDnHandle_t * handle__ = (cusolverDnHandle_t *) *handle;
