@@ -8,84 +8,60 @@ on:
 
 jobs:
   intelclassic-mkl-intelmpi:
-    runs-on: ubuntu-22.04
-
+    runs-on: ubuntu-latest
     env:
-      # Keep CI stable and avoid oversubscription issues
-      OMP_NUM_THREADS: 2
-      MKL_NUM_THREADS: 1
-      I_MPI_FABRICS: "shm"
-      I_MPI_SHM_HEAP_VSIZE: "64"   # integer MB (not "64M")
-      # Make Intel MPI wrappers call classic compilers
-      I_MPI_CC: icc
-      I_MPI_CXX: icpc
-      I_MPI_FC: ifort
-      # Force setvars.sh to run even if previous steps exported its flags
-      SETVARS_ARGS: "--force"
+      CC: icx
+      CXX: icpx
+      FC: ifort
 
     steps:
-      - name: Intel APT repository
-        timeout-minutes: 1
-        run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt-get update
+    - name: Intel Apt repository
+      timeout-minutes: 1
+      run: |
+        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+        sudo apt-get update
 
-      - name: Install Intel oneAPI (classic compilers, MPI, MKL)
-        timeout-minutes: 30
-        run: |
-          sudo apt-get install -y \
-            intel-oneapi-compiler-fortran-2023.2.4/all \
-            intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.4/all \
-            intel-oneapi-mpi-2021.9.0/all \
-            intel-oneapi-mpi-devel-2021.9.0/all \
-            intel-oneapi-mkl-2024.0/all \
-            cmake python3-pip
+    - name: Install Intel oneAPI
+      timeout-minutes: 30
+      run: |
+          sudo apt-get install intel-oneapi-compiler-fortran-2023.2.4/all \
+                               intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.4/all \
+                               intel-oneapi-mpi-2021.9.0/all \
+                               intel-oneapi-mpi-devel-2021.9.0/all \
+                               intel-oneapi-mkl-2024.0/all \
+                               ninja-build
 
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Install CMake
+      run: sudo apt-get install cmake
 
-      - name: Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install numpy scipy pandas
+    - name: Install and Setup Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.11
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Install python dependencies
+      run: pip install numpy scipy pandas
 
-      - name: Setup Intel oneAPI environment
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          printenv >> $GITHUB_ENV
+    - name: Checkout the project repository
+      uses: actions/checkout@v4
 
-      - name: Lint TurboRVB (devel_tools/run_linter.py)
-        run: python ./devel_tools/run_linter.py .
+    - name: Setup Intel oneAPI environment
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        printenv >> $GITHUB_ENV
 
-      - name: Configure with CMake (Unix Makefiles, IntelMPI wrappers)
-        shell: bash
-        env:
-          CC: mpiicc
-          CXX: mpiicpc
-          FC: mpiifort
-        run: |
-          cmake -S . -B build -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DEXT_PARALLEL=ON \
-            -DBLA_VENDOR=Intel10_64lp \
-            -DCMAKE_C_COMPILER=mpiicc \
-            -DCMAKE_CXX_COMPILER=mpiicpc \
-            -DCMAKE_Fortran_COMPILER=mpiifort
+    - name: Lint TurboRVB with devel_tools/run_linter.py
+      run: |
+        python ./devel_tools/run_linter.py .
 
-      - name: Build (make backend via CMake)
-        shell: bash
-        run: |
-          cmake --build build -j 2
+    - name: Build TurboRVB with cmake serial and parallel versions
+      run: |
+        cmake -S. -Bbuild -DEXT_PARALLEL=ON -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort
+        cmake --build build -j 2
 
-      - name: Test with CTest
-        shell: bash
-        run: |
-          ctest --test-dir build --output-on-failure
+    - name: Test TurboRVB with ctest both serial and parallel versions
+      run: |
+        ctest --test-dir build --output-on-failure
