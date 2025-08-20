@@ -9,13 +9,28 @@ on:
 jobs:
   intelclassic-mkl-intelmpi:
     runs-on: ubuntu-22.04
+
+    # Run inside the oneAPI HPC 2023.2 container that includes icc/ifort
+    container:
+      image: intel/oneapi-hpckit:2023.2-devel-ubuntu22.04
+
     env:
-      # Keep thread count low for CI VMs
+      # Keep threads low for CI VMs
       OMP_NUM_THREADS: 2
       I_MPI_FABRICS: "shm"
       I_MPI_SHM_HEAP_VSIZE: "64M"
+      # Force Intel MPI wrappers to use classic compilers
+      I_MPI_CC: icc
+      I_MPI_CXX: icpc
+      I_MPI_FC: ifort
 
     steps:
+      - name: Source oneAPI environment
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          printenv | tee -a $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -24,32 +39,24 @@ jobs:
         with:
           python-version: "3.8"
 
-      - name: Add Intel oneAPI APT repository
+      - name: Python deps
         run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt-get update
-
-      - name: Install Intel classic compilers, IntelMPI, MKL
-        run: |
-          sudo apt-get install -y --no-install-recommends \
-            cmake pkg-config python3-pip \
-            intel-oneapi-compiler-fortran \
-            intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic \
-            intel-oneapi-mpi intel-oneapi-mpi-devel \
-            intel-oneapi-mkl
           python -m pip install --upgrade pip
           pip install numpy scipy pandas
-          # Export oneAPI env (icc/ifort, MPI, MKL)
-          bash -lc 'source /opt/intel/oneapi/setvars.sh && printenv >> $GITHUB_ENV'
+
+      - name: Sanity check compilers
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          icc -v
+          ifort -V
+          mpiicc -show
+          mpiifort -show
 
       - name: Lint
         run: python ./devel_tools/run_linter.py .
 
-      - name: Configure (CMake)
-        # Use Intel MPI wrappers that invoke icc/icpc/ifort
+      - name: Configure (CMake with Unix Makefiles)
         env:
           CC: mpiicc
           CXX: mpiicpc
@@ -58,7 +65,8 @@ jobs:
           cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
-            -DBLA_VENDOR=Intel10_64lp
+            -DBLA_VENDOR=Intel10_64lp \
+            -DCMAKE_Fortran_COMPILER=mpiifort
 
       - name: Build
         run: cmake --build build -j 2

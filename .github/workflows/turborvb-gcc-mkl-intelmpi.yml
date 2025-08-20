@@ -1,0 +1,69 @@
+name: TurboRVB (GCC + MKL + IntelMPI)
+
+on:
+  push:
+    branches: [ "main", "devel" ]
+  pull_request:
+    branches: [ "main", "devel" ]
+
+jobs:
+  gcc-mkl-intelmpi:
+    runs-on: ubuntu-22.04
+    env:
+      # Use shared-memory fabric to stabilize Intel MPI in CI
+      OMP_NUM_THREADS: 2
+      I_MPI_FABRICS: "shm"
+      I_MPI_SHM_HEAP_VSIZE: "64M"
+      # Force Intel MPI wrappers to use GNU compilers
+      I_MPI_CC: gcc
+      I_MPI_CXX: g++
+      I_MPI_FC: gfortran
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Add Intel oneAPI APT repository
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+
+      - name: Install GCC, IntelMPI, MKL
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            gcc g++ gfortran cmake pkg-config \
+            intel-oneapi-mpi intel-oneapi-mpi-devel \
+            intel-oneapi-mkl python3-pip
+          python -m pip install --upgrade pip
+          pip install numpy scipy pandas
+          # Export MPI/MKL env vars
+          bash -lc 'source /opt/intel/oneapi/setvars.sh && printenv >> $GITHUB_ENV'
+
+      - name: Lint
+        run: python ./devel_tools/run_linter.py .
+
+      - name: Configure (CMake)
+        # Intel MPI wrappers call the compilers specified by I_MPI_* above
+        env:
+          CC: mpicc
+          CXX: mpicxx
+          FC: mpifc
+        run: |
+          cmake -S . -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DEXT_PARALLEL=ON \
+            -DBLA_VENDOR=Intel10_64lp
+
+      - name: Build
+        run: cmake --build build -j 2
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
