@@ -45,7 +45,7 @@ jobs:
       - name: Lint
         run: python ./devel_tools/run_linter.py .
 
-      - name: Configure (CMake, robust MKL detection: gf → rt fallback)
+      - name: Configure (CMake, robust MKL detection: gf -> rt fallback)
         env:
           CC: mpicc
           CXX: mpicxx
