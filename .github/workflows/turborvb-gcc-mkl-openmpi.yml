@@ -45,49 +45,45 @@ jobs:
       - name: Lint
         run: python ./devel_tools/run_linter.py .
 
-      - name: Configure (CMake, robust MKL detection: gf -> rt fallback)
-        env:
-          CC: mpicc
-          CXX: mpicxx
-          FC: mpifort
-          # Stabilize MKL behavior in CI
-          MKL_INTERFACE_LAYER: LP64
-          MKL_THREADING_LAYER: SEQUENTIAL
-          MKL_NUM_THREADS: "1"
-          OMPI_MCA_rmaps_base_oversubscribe: "1"
-          OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+      - name: "Configure (CMake, robust MKL detection: gf -> rt fallback)"
         shell: bash
+        # Stabilize MKL behavior in CI
+        env:
+            CC: mpicc
+            CXX: mpicxx
+            FC: mpifort
+            MKL_INTERFACE_LAYER: "LP64"
+            MKL_THREADING_LAYER: "SEQUENTIAL"
+            MKL_NUM_THREADS: "1"
+            OMPI_MCA_rmaps_base_oversubscribe: "1"
+            OMPI_MCA_btl_vader_single_copy_mechanism: "none"
         run: |
-          set -euxo pipefail
-          : "${MKLROOT:?MKLROOT is not set (source setvars.sh earlier)}"
-
-          # Try both possible libdirs used by different oneMKL packages
-          CANDIDATES=("$MKLROOT/lib/intel64" "$MKLROOT/lib")
-          MKL_LIBDIR=""
-          for d in "${CANDIDATES[@]}"; do
+            set -euxo pipefail
+            : "${MKLROOT:?MKLROOT is not set (source setvars.sh earlier)}"
+        
+            CANDIDATES=("$MKLROOT/lib/intel64" "$MKLROOT/lib")
+            MKL_LIBDIR=""
+            for d in "${CANDIDATES[@]}"; do
             if [ -f "$d/libmkl_gf_lp64.so" ] || [ -f "$d/libmkl_rt.so" ]; then
-              MKL_LIBDIR="$d"; break
+                MKL_LIBDIR="$d"; break
             fi
-          done
-          if [ -z "$MKL_LIBDIR" ]; then
-            echo "MKL libraries not found under $MKLROOT. Tree follows:" >&2
-            ls -R "$MKLROOT" >&2 || true
+            done
+            if [ -z "$MKL_LIBDIR" ]; then
+            echo "MKL libraries not found under $MKLROOT" >&2
             exit 1
-          fi
-
-          # Prefer GNU Fortran interface if available; otherwise fall back to libmkl_rt
-          if [ -f "$MKL_LIBDIR/libmkl_gf_lp64.so" ]; then
+            fi
+        
+            if [ -f "$MKL_LIBDIR/libmkl_gf_lp64.so" ]; then
             echo "Using MKL GNU Fortran interface (gf + core + sequential) from $MKL_LIBDIR"
             BLAS_LIBS="$MKL_LIBDIR/libmkl_gf_lp64.so;$MKL_LIBDIR/libmkl_core.so;$MKL_LIBDIR/libmkl_sequential.so"
-          else
+            else
             echo "Falling back to MKL single dynamic library (libmkl_rt) from $MKL_LIBDIR"
             BLAS_LIBS="$MKL_LIBDIR/libmkl_rt.so;-lpthread;-lm;-ldl"
-          fi
-
-          # Help runtime loader
-          echo "LD_LIBRARY_PATH=$MKL_LIBDIR:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-
-          cmake -S . -B build -G "Unix Makefiles" \
+            fi
+        
+            echo "LD_LIBRARY_PATH=$MKL_LIBDIR:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+        
+            cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
             -DBLA_VENDOR=Generic \
