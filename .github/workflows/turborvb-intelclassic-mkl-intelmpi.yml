@@ -35,7 +35,7 @@ jobs:
       - name: Install Intel classic compilers, IntelMPI, MKL
         run: |
           sudo apt-get install -y --no-install-recommends \
-            cmake ninja-build pkg-config python3-pip \
+            cmake pkg-config python3-pip \
             intel-oneapi-compiler-fortran \
             intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic \
             intel-oneapi-mpi intel-oneapi-mpi-devel \
@@ -55,7 +55,7 @@ jobs:
           CXX: mpiicpc
           FC: mpiifort
         run: |
-          cmake -S . -B build -G Ninja \
+          cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
             -DBLA_VENDOR=Intel10_64lp

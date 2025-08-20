@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build pkg-config \
+            build-essential cmake pkg-config \
             gcc g++ gfortran \
             openmpi-bin libopenmpi-dev \
             libopenblas-dev liblapack-dev \
@@ -45,7 +45,7 @@ jobs:
           CXX: mpicxx
           FC: mpifort
         run: |
-          cmake -S . -B build -G Ninja \
+          cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
             -DBLA_VENDOR=OpenBLAS
