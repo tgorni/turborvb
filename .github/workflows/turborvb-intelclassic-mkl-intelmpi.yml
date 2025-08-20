@@ -1,4 +1,4 @@
-name: TurboRVB linter-check, build, and test (icc, ifort, MKL, IntelMPI)
+name: TurboRVB (Intel classic icc/ifort + MKL + IntelMPI)
 
 on:
   push:
@@ -7,19 +7,21 @@ on:
     branches: [ "main", "devel" ]
 
 jobs:
-  intel-oneapi-legacy-test:
-    runs-on: ubuntu-latest
+  intelclassic-mkl-intelmpi:
+    runs-on: ubuntu-22.04
 
-    # Keep threads low and stabilize Intel MPI in CI
     env:
+      # Keep CI stable and avoid oversubscription issues
       OMP_NUM_THREADS: 2
       MKL_NUM_THREADS: 1
       I_MPI_FABRICS: "shm"
-      I_MPI_SHM_HEAP_VSIZE: "64M"
-      # Force Intel MPI wrappers to use classic compilers
+      I_MPI_SHM_HEAP_VSIZE: "64"   # integer MB (not "64M")
+      # Make Intel MPI wrappers call classic compilers
       I_MPI_CC: icc
       I_MPI_CXX: icpc
       I_MPI_FC: ifort
+      # Force setvars.sh to run even if previous steps exported its flags
+      SETVARS_ARGS: "--force"
 
     steps:
       - name: Intel APT repository
@@ -55,12 +57,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Intel oneAPI environment
-        shell: bash
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          printenv >> $GITHUB_ENV
-
+      # NOTE: Do NOT export full env to $GITHUB_ENV. Just source setvars where needed.
       - name: Sanity check toolchain
         shell: bash
         run: |
@@ -74,12 +71,13 @@ jobs:
         run: python ./devel_tools/run_linter.py .
 
       - name: Configure with CMake (Unix Makefiles, IntelMPI wrappers)
-        # Use MPI wrappers so MPI include/libs are correctly picked up
+        shell: bash
         env:
           CC: mpiicc
           CXX: mpiicpc
           FC: mpiifort
         run: |
+          source /opt/intel/oneapi/setvars.sh
           cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
@@ -89,8 +87,13 @@ jobs:
             -DCMAKE_Fortran_COMPILER=mpiifort
 
       - name: Build (make backend via CMake)
-        run: cmake --build build -j 2
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          cmake --build build -j 2
 
       - name: Test with CTest
-        run: ctest --test-dir build --output-on-failure
-
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          ctest --test-dir build --output-on-failure
