@@ -1,0 +1,72 @@
+name: TurboRVB (AMD AOCC + AOCL + OpenMPI, container)
+
+on:
+  push:
+    branches: [ "main", "devel" ]
+  pull_request:
+    branches: [ "main", "devel" ]
+
+jobs:
+  aocc-aocl-openmpi:
+    runs-on: ubuntu-22.04
+
+    # Replace the image below with an AMD-provided AOCC/AOCL image that includes compilers and AOCL
+    container:
+      image: amd/aocc-aocl:latest
+      # If your registry requires auth, configure credentials in your repo secrets and add a login step.
+
+    env:
+      OMP_NUM_THREADS: 2
+      # Common AOCC compiler names (adjust if your image differs)
+      CC: clang
+      CXX: clang++
+      FC: amdflang
+
+      # Typical AOCL install roots (adjust to your image layout)
+      AOCL_ROOT: /opt/AMD/aocl
+      AOCL_LIB: /opt/AMD/aocl/lib
+
+    steps:
+      - name: Print toolchain versions
+        run: |
+          ${CC} --version
+          ${CXX} --version
+          ${FC} --version || true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure build tools and MPI (if not present in image)
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends cmake pkg-config python3-pip \
+            openmpi-bin libopenmpi-dev
+          python3 -m pip install --upgrade pip
+          python3 -m pip install numpy scipy pandas
+          mpicc -v || true
+          mpifort -v || true
+
+      - name: Lint
+        run: python3 ./devel_tools/run_linter.py .
+
+      - name: Configure (CMake, point to AOCL BLAS/LAPACK explicitly)
+        env:
+          # Use MPI wrappers; Fortran wrapper may be mpifort or mpif90
+          CC: mpicc
+          CXX: mpicxx
+          FC: mpifort
+        run: |
+          # If CMake cannot detect AOCL via BLA_VENDOR, pass explicit libs:
+          #   BLAS = libblis, LAPACK = libflame (adjust names/paths if different)
+          cmake -S . -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DEXT_PARALLEL=ON \
+            -DBLA_VENDOR=Generic \
+            -DBLAS_LIBRARIES="${AOCL_LIB}/libblis.so" \
+            -DLAPACK_LIBRARIES="${AOCL_LIB}/libflame.so"
+
+      - name: Build
+        run: cmake --build build -j 2
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
