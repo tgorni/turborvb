@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       # Use shared-memory fabric to stabilize Intel MPI in CI
-      OMP_NUM_THREADS: 2
-      I_MPI_FABRICS: "shm"
-      I_MPI_SHM_HEAP_VSIZE: "64M"
-      # Force Intel MPI wrappers to use GNU compilers
-      I_MPI_CC: gcc
-      I_MPI_CXX: g++
-      I_MPI_FC: gfortran
+       OMP_NUM_THREADS: 2
+       I_MPI_FABRICS: "shm"
+       # I_MPI_SHM_HEAP_VSIZE: "64M"
+       I_MPI_SHM_HEAP_VSIZE: "64"
+       I_MPI_CC: gcc
+       I_MPI_CXX: g++
+       I_MPI_FC: gfortran
 
     steps:
       - name: Checkout

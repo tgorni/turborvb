@@ -1,4 +1,4 @@
-name: TurboRVB (Intel classic icc/ifort + MKL + IntelMPI)
+name: TurboRVB linter-check, build, and test (icc, ifort, MKL, IntelMPI)
 
 on:
   push:
@@ -7,16 +7,13 @@ on:
     branches: [ "main", "devel" ]
 
 jobs:
-  intelclassic-mkl-intelmpi:
-    runs-on: ubuntu-22.04
+  intel-oneapi-legacy-test:
+    runs-on: ubuntu-latest
 
-    # Run inside the oneAPI HPC 2023.2 container that includes icc/ifort
-    container:
-      image: intel/oneapi-hpckit:2023.2-devel-ubuntu22.04
-
+    # Keep threads low and stabilize Intel MPI in CI
     env:
-      # Keep threads low for CI VMs
       OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 1
       I_MPI_FABRICS: "shm"
       I_MPI_SHM_HEAP_VSIZE: "64M"
       # Force Intel MPI wrappers to use classic compilers
@@ -25,26 +22,46 @@ jobs:
       I_MPI_FC: ifort
 
     steps:
-      - name: Source oneAPI environment
-        shell: bash
+      - name: Intel APT repository
+        timeout-minutes: 1
         run: |
-          source /opt/intel/oneapi/setvars.sh
-          printenv | tee -a $GITHUB_ENV
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Install Intel oneAPI (classic compilers, MPI, MKL)
+        timeout-minutes: 30
+        run: |
+          sudo apt-get install -y \
+            intel-oneapi-compiler-fortran-2023.2.4/all \
+            intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.4/all \
+            intel-oneapi-mpi-2021.9.0/all \
+            intel-oneapi-mpi-devel-2021.9.0/all \
+            intel-oneapi-mkl-2024.0/all \
+            cmake python3-pip
 
-      - name: Setup Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.11"
 
-      - name: Python deps
+      - name: Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install numpy scipy pandas
 
-      - name: Sanity check compilers
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Intel oneAPI environment
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          printenv >> $GITHUB_ENV
+
+      - name: Sanity check toolchain
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
@@ -53,10 +70,11 @@ jobs:
           mpiicc -show
           mpiifort -show
 
-      - name: Lint
+      - name: Lint TurboRVB (devel_tools/run_linter.py)
         run: python ./devel_tools/run_linter.py .
 
-      - name: Configure (CMake with Unix Makefiles)
+      - name: Configure with CMake (Unix Makefiles, IntelMPI wrappers)
+        # Use MPI wrappers so MPI include/libs are correctly picked up
         env:
           CC: mpiicc
           CXX: mpiicpc
@@ -66,10 +84,13 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
             -DBLA_VENDOR=Intel10_64lp \
+            -DCMAKE_C_COMPILER=mpiicc \
+            -DCMAKE_CXX_COMPILER=mpiicpc \
             -DCMAKE_Fortran_COMPILER=mpiifort
 
-      - name: Build
+      - name: Build (make backend via CMake)
         run: cmake --build build -j 2
 
-      - name: Test
+      - name: Test with CTest
         run: ctest --test-dir build --output-on-failure
+

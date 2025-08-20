@@ -45,16 +45,29 @@ jobs:
       - name: Lint
         run: python ./devel_tools/run_linter.py .
 
-      - name: Configure (CMake)
+      - name: Configure (CMake, force MKL gf + sequential)
         env:
           CC: mpicc
           CXX: mpicxx
           FC: mpifort
+          # Keep MKL single-threaded for stability
+          MKL_THREADING_LAYER: SEQUENTIAL
+          MKL_NUM_THREADS: 1
+          OMPI_MCA_rmaps_base_oversubscribe: "1"
+          OMPI_MCA_btl_vader_single_copy_mechanism: "none"
         run: |
+          # Sanity: make sure MKL gf libs exist
+          ls -l $MKLROOT/lib/intel64/libmkl_gf_lp64.so
+          ls -l $MKLROOT/lib/intel64/libmkl_core.so
+          ls -l $MKLROOT/lib/intel64/libmkl_sequential.so
+
           cmake -S . -B build -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXT_PARALLEL=ON \
-            -DBLA_VENDOR=Intel10_64lp
+            -DBLA_VENDOR=Generic \
+            -DBLAS_LIBRARIES="$MKLROOT/lib/intel64/libmkl_gf_lp64.so;$MKLROOT/lib/intel64/libmkl_core.so;$MKLROOT/lib/intel64/libmkl_sequential.so" \
+            -DLAPACK_LIBRARIES="$MKLROOT/lib/intel64/libmkl_gf_lp64.so;$MKLROOT/lib/intel64/libmkl_core.so;$MKLROOT/lib/intel64/libmkl_sequential.so" \
+            -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed"
 
       - name: Build
         run: cmake --build build -j 2
