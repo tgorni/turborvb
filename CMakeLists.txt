@@ -511,6 +511,7 @@ if(EXT_TOOLS)
     list(APPEND TOOLS_LIST_SIMPLE copydet )
     list(APPEND TOOLS_LIST_SIMPLE pseudo )
     list(APPEND TOOLS_LIST_SIMPLE plot_orbitals )
+    list(APPEND TOOLS_LIST_SIMPLE plot_contracted )
     list(APPEND TOOLS_LIST_SIMPLE assembling_pseudo)
     list(APPEND TOOLS_LIST_SIMPLE orthomol )
 
