@@ -5489,6 +5489,14 @@ contains
         yesmin_read = .false.
         if (molopt .ne. 0) yesmin_read = .true.
 
+#ifdef _CUBLAS
+#ifdef RISC
+        call cublas_handle_init_(cublas_handle)
+#else
+        call cublas_handle_init(cublas_handle)
+#endif
+#endif
+
 #ifdef _CUSOLVER
 #ifdef RISC
         call cusolver_handle_init_(handle)
@@ -8729,6 +8737,14 @@ contains
         iend_sav = iend
 
         iend = i_main
+
+#ifdef _CUBLAS
+#ifdef RISC
+        call cublas_handle_destroy_(cublas_handle)
+#else
+        call cublas_handle_destroy(cublas_handle)
+#endif
+#endif
 
 #ifdef _CUSOLVER
 #ifdef RISC

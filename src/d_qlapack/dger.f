@@ -17,7 +17,7 @@ cTL off
 *                         All rights reserved.
 *
       SUBROUTINE DGER_(M,N,ALPHA,X,INCX,Y,INCY,A,LDA)
-      USE allio, ONLY: yes_ontarget
+      USE allio, ONLY: yes_ontarget, cublas_handle
 c
       IMPLICIT NONE
 c
@@ -34,11 +34,11 @@ c
 #ifdef _OFFLOAD
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_dger_offload_(M,N,alpha,X,incx,Y
+      CALL cublas_dger_offload_(cublas_handle,M,N,alpha,X,incx,Y
      +                          ,incy,A,LDA)
       CALL cudasync_
 #else
-      CALL cublas_dger_offload(M,N,alpha,X,incx,Y
+      CALL cublas_dger_offload(cublas_handle,M,N,alpha,X,incx,Y
      +                        ,incy,A,LDA)
       CALL cudasync
 #endif

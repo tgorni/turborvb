@@ -14,6 +14,7 @@
 ! along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 program test_dgemv
+    use allio, only: cublas_handle
     implicit none
 
     real*8, allocatable, dimension(:, :) :: B
@@ -27,6 +28,11 @@ program test_dgemv
 
 #if defined(_OFFLOAD) && defined(_CUBLAS)
     yes_on_target = .true.
+#ifdef RISC
+        call cublas_handle_init_(cublas_handle)
+#else
+        call cublas_handle_init(cublas_handle)
+#endif
 #endif
 
     ! gen = 1 : Generate matrices

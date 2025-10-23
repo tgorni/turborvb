@@ -14,6 +14,7 @@
 ! along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 program test_zgemm_b
+    use allio, only: cublas_handle
     implicit none
 
     complex*16, allocatable, dimension(:, :) :: A, B, AB, BB, CB, CB_i
@@ -25,6 +26,14 @@ program test_zgemm_b
     integer*8 :: T_start, T_end, rate, N_ops
     character(len=1) :: first, second
     character(len=100) :: message, str_tmp1, str_tmp2
+
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+    call cublas_handle_init_(cublas_handle)
+#else
+    call cublas_handle_init(cublas_handle)
+#endif
+#endif
 
     ! gen = 1 : Generate matrices
     ! gen = 0 : Compare matrices

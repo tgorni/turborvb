@@ -18,6 +18,8 @@ cTL off
 *
       SUBROUTINE ZGEMV_(trans,M,N,alpha,A,lda,X,incx,beta
      +,Y,incy,YES_ONTARGET)
+c
+      USE allio, ONLY: cublas_handle
 
       IMPLICIT NONE
 
@@ -40,12 +42,12 @@ cTL off
           CALL ZGEMV(trans,M,N,alpha,A,lda,X,incx,beta,Y,incy)
       ELSE
 #ifdef RISC
-           CALL cublas_zgemv_offload_(trans,M,N,alpha,A,lda,x
-     +,incx,beta,y,incy)
+           CALL cublas_zgemv_offload_(cublas_handle,trans,M,N,alpha
+     +                               ,A,lda,x,incx,beta,y,incy)
            CALL cudasync_
 #else
-           CALL cublas_zgemv_offload(trans,M,N,alpha,A,lda,x
-     +,incx,beta,y,incy)
+           CALL cublas_zgemv_offload(cublas_handle,trans,M,N,alpha
+     +                              ,A,lda,x,incx,beta,y,incy)
            CALL cudasync
 #endif
       END IF

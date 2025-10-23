@@ -18,6 +18,7 @@ cTL off
 *
       SUBROUTINE DGER2(M,N,ALPHA,X,LDX,Y,LDY,A,LDA)
       USE constants,  ONLY: yes_ontarget
+      USE allio,      ONLY: cublas_handle
 c
       IMPLICIT NONE
       REAL*8 :: ALPHA
@@ -38,12 +39,12 @@ c
 #ifdef _OFFLOAD
 #ifdef _CUBLAS
 #ifdef RISC
-      CALL cublas_dgemm_offload_('N','T',M,N,2,alpha,X,LDX,Y
-     +                          ,LDY,1.d0,A,LDA)
+      CALL cublas_dgemm_offload_(cublas_handle,'N','T',M,N,2,alpha,X,LDX
+     +                          ,Y,LDY,1.d0,A,LDA)
       CALL cudasync_
 #else
-      CALL cublas_dgemm_offload('N','T',M,N,2,alpha,X,LDX,Y
-     +                         ,LDY,1.d0,A,LDA)
+      CALL cublas_dgemm_offload(cublas_handle,'N','T',M,N,2,alpha,X,LDX
+     +                         ,Y,LDY,1.d0,A,LDA)
       CALL cudasync
 #endif
 #else

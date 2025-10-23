@@ -18,6 +18,8 @@ cTL off
 *
       SUBROUTINE DGEMV_(trans,M,N,alpha,A,lda,X,incx,beta
      +,Y,incy,yes_ontarget)
+              
+      USE allio, ONLY: cublas_handle
 
       IMPLICIT NONE
 
@@ -40,13 +42,13 @@ cTL off
       CALL DGEMV(trans,M,N,alpha,A,lda,X,incx,beta,Y,incy)
       ELSE
 #ifdef RISC
-           CALL cublas_dgemv_offload_(trans,M,N,alpha,A,lda,X
-     +                               ,incx,beta,Y,incy)
-           CALL cudasync_
+        CALL cublas_dgemv_offload_(cublas_handle,trans,M,N,alpha,A,lda,X
+     +                            ,incx,beta,Y,incy)
+        CALL cudasync_
 #else
-           CALL cublas_dgemv_offload(trans,M,N,alpha,A,lda,X
-     +                              ,incx,beta,Y,incy)
-           CALL cudasync
+        CALL cublas_dgemv_offload(cublas_handle,trans,M,N,alpha,A,lda,X
+     +                           ,incx,beta,Y,incy)
+        CALL cudasync
 #endif
       END IF
 #else

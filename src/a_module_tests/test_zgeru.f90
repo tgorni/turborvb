@@ -17,6 +17,7 @@ program test_zgeru
 
 #if defined(_OFFLOAD)
     use constants, only: yes_ontarget
+    use allio, only: cublas_handle
 #endif
 
     implicit none
@@ -29,6 +30,14 @@ program test_zgeru
 
 #if defined(_OFFLOAD)
     yes_ontarget = .true.
+#endif
+
+#if defined(_OFFLOAD) && defined(_CUBLAS)
+#ifdef RISC
+    call cublas_handle_init_(cublas_handle)
+#else
+    call cublas_handle_init(cublas_handle)
+#endif
 #endif
 
     read (*, *) s

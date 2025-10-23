@@ -127,6 +127,7 @@ module allio
     !end added Andrea Tirelli
 
     integer*8 :: handle
+    integer*8 :: cublas_handle
     integer*4 ldworkspace, lzworkspace, dev_Info(1)
     real*8, allocatable, dimension(:) :: dev_dgetrf_workspace
     complex*16, allocatable, dimension(:) :: dev_zgetrf_workspace
