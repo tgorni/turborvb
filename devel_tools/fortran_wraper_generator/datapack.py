@@ -685,6 +685,9 @@ for ii, entry in enumerate(cublas_v2):
                                  "offload": False,
                                  "const": True,
                                  "recast": {"to": "cublasHandle_t"}})
+        for yy, entry_arg in enumerate(entry["args"]):
+            if entry_arg["name"] in ("alpha", "beta"):
+                entry["args"][yy]["norefpass"] = True
     cublas_v2[ii] = entry
 
 """
