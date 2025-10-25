@@ -114,7 +114,7 @@ def add_cublas_types(cw):
                   "if (*blas_op_type == 't') return CUBLAS_OP_T;",
                   "if (*blas_op_type == 'C') return CUBLAS_OP_C;",
                   "if (*blas_op_type == 'c') return CUBLAS_OP_C;",
-                  "printf(\"WARNING: unrecognized blas_op_type\\n\")",
+                  "printf(\"WARNING: unrecognized blas_op_type\\n\");",
                   "return -1;"))
     cw.add_function_definition(fun)
 
