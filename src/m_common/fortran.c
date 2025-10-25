@@ -132,7 +132,7 @@ void cublas_sgemm_offload_(const long int * handle, const char * transa, const c
     float * devPtrA_ = (float *) devPtrA;
     float * devPtrB_ = (float *) devPtrB;
     float * devPtrC_ = (float *) devPtrC;
-    cublasSgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasSgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
 }
 #endif /* _CUBLAS */
@@ -145,7 +145,7 @@ void cublas_dgemm_offload_(const long int * handle, const char * transa, const c
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrB_ = (double *) devPtrB;
     double * devPtrC_ = (double *) devPtrC;
-    cublasDgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasDgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
 }
 #endif /* _CUBLAS */
@@ -158,7 +158,7 @@ void cublas_zgemm_offload_(const long int * handle, const char * transa, const c
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrB_ = (cuDoubleComplex *) devPtrB;
     cuDoubleComplex * devPtrC_ = (cuDoubleComplex *) devPtrC;
-    cublasZgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, * beta, devPtrC_, * ldc);
+    cublasZgemm(* handle__, cublas_op_type(transa), cublas_op_type(transb), * M, * N, * K, alpha, devPtrA_, * lda, devPtrB_, * ldb, beta, devPtrC_, * ldc);
     }
 }
 #endif /* _CUBLAS */
@@ -171,7 +171,7 @@ void cublas_sgemv_offload_(const long int * handle, const char * trans, const in
     float * devPtrA_ = (float *) devPtrA;
     float * devPtrX_ = (float *) devPtrX;
     float * devPtrY_ = (float *) devPtrY;
-    cublasSgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasSgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
 }
 #endif /* _CUBLAS */
@@ -184,7 +184,7 @@ void cublas_dgemv_offload_(const long int * handle, const char * trans, const in
     double * devPtrA_ = (double *) devPtrA;
     double * devPtrX_ = (double *) devPtrX;
     double * devPtrY_ = (double *) devPtrY;
-    cublasDgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasDgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
 }
 #endif /* _CUBLAS */
@@ -197,7 +197,7 @@ void cublas_zgemv_offload_(const long int * handle, const char * trans, const in
     cuDoubleComplex * devPtrA_ = (cuDoubleComplex *) devPtrA;
     cuDoubleComplex * devPtrX_ = (cuDoubleComplex *) devPtrX;
     cuDoubleComplex * devPtrY_ = (cuDoubleComplex *) devPtrY;
-    cublasZgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, * beta, devPtrY_, * incy);
+    cublasZgemv(* handle__, cublas_op_type(trans), * M, * N, alpha, devPtrA_, * lda, devPtrX_, * incx, beta, devPtrY_, * incy);
     }
 }
 #endif /* _CUBLAS */
