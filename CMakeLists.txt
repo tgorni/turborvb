@@ -69,7 +69,7 @@ message("")
 
 cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
 
-project(TurboRVB LANGUAGES Fortran C) 
+project(TurboRVB LANGUAGES Fortran C)
 
 cmake_policy(SET CMP0057 NEW) # Adding IN_LIST
 cmake_policy(SET CMP0054 NEW) # Adding IN_LIST
@@ -79,14 +79,14 @@ cmake_policy(SET CMP0054 NEW) # Adding IN_LIST
 # Define special target properties
 #
 
-define_property(TARGET 
-                PROPERTY NOFLAG 
+define_property(TARGET
+                PROPERTY NOFLAG
                 BRIEF_DOCS "List of precompiler flags \
                             that has to be removed from target"
                 FULL_DOCS  "List of precompiler flags \
                             that has to be removed from target.\
                             It works for serial and parallel flags." )
-                                                   
+
 #
 ######################################################################
 
@@ -238,15 +238,15 @@ if( CMAKE_Fortran_COMPILER_ID IN_LIST MKL_ALLOWED_COMPILERS)
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set(MKL_THREADING gnu_thread)
   endif()
-  
+
   if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel.*")
     set(MKL_THREADING intel_thread)
   endif()
-  
+
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
       set( CMAKE_Fortran_COMPILER_ID "PGI" )
   endif()
-  
+
   find_package(MKL QUIET)
 
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
@@ -351,7 +351,7 @@ endif()
 if(EXT_GPU)
 
   find_package(CUDAToolkit)
-  
+
   if(CUDAToolkit_FOUND)
     list(APPEND PPDIRECTIVES _OFFLOAD)
     list(APPEND PPDIRECTIVES _CUBLAS)
@@ -389,7 +389,7 @@ if (EXT_QMC)
     add_target_lib_serial_wrapper(complex-serial)
     add_target_exe_serial_wrapper(turborvb-serial)
   endif()
-  
+
   if(EXT_PARALLEL)
     add_target_lib_serial_wrapper(pfapack)
     add_target_lib_parallel_wrapper(qlapack-mpi)
@@ -542,7 +542,7 @@ if(EXT_TOOLS)
     add_target_lib_serial_wrapper(adjoint-forward-serial)
     add_target_lib_serial_wrapper(adjoint-backward-serial)
   endif()
-  
+
   # parallel tools
   if(EXT_PARALLEL)
     add_target_exe_parallel_wrapper( readforward-mpi )
@@ -669,7 +669,7 @@ if(EXT_MODTEST)
         )
       list(APPEND SPEED_TESTS run_speed_lrdmc)
     endif()
-    
+
     add_custom_target( speed_tests
         DEPENDS "${SPEED_TESTS}"
         )
@@ -722,7 +722,7 @@ if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 
     prepare_agressive_gnu()
     set_gnu_fortran_compiler()
-  
+
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")
 
     prepare_agressive_amd()
@@ -766,7 +766,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   # Here GCC part ends
   #
   ######################################################################
-  
+
 elseif(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 
   ######################################################################
@@ -775,7 +775,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "Intel")
   #
 
   set_intel_c_compiler()
-  
+
   #
   # Here Intel (legacy) part ends
   #
@@ -789,7 +789,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   #
 
   set_amd_c_compiler()
-  
+
   #
   # Here amd part ends
   #
@@ -803,7 +803,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
   #
 
   set_oneapi_c_compiler()
-  
+
   #
   # Here Intel oneAPI part ends
   #
@@ -817,7 +817,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "XLClang")
   #
 
   set_xl_c_compiler()
-  
+
   #
   # Here IBM part ends
   #
@@ -938,4 +938,19 @@ if(Python3_FOUND)
 endif()
 
 summary()
+
+######################################################################
+#
+# Install helper scripts and utilities distributed under bin/
+# so that "make install" copies the original assets alongside
+# compiled executables.
+#
+######################################################################
+
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/
+  DESTINATION bin
+  USE_SOURCE_PERMISSIONS
+  PATTERN "CMakeLists.txt" EXCLUDE
+)
 
