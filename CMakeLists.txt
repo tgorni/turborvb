@@ -513,6 +513,7 @@ if(EXT_TOOLS)
     list(APPEND TOOLS_LIST_SIMPLE plot_orbitals )
     list(APPEND TOOLS_LIST_SIMPLE plot_contracted )
     list(APPEND TOOLS_LIST_SIMPLE assembling_pseudo)
+    list(APPEND TOOLS_LIST_SIMPLE cleanfort10)
     list(APPEND TOOLS_LIST_SIMPLE orthomol )
 
     foreach(TOOL_NAME ${TOOLS_LIST_SIMPLE})
