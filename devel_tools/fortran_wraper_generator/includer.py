@@ -34,6 +34,7 @@ def add_this(cw, d):
             if not x["const"]:
                 qualifiers.remove("const")
         name = x["name"]
+
         type_ = x["type"] + " *"
 
         v = cs.Variable(name, type_, qualifiers = qualifiers)
@@ -53,7 +54,9 @@ def add_this(cw, d):
                 return_value = x["name"]
         except:
             call_name = x["name"]
-            if x["offload"]:
+            if "deprecated_cast" in x:
+                call_name = f"{x['deprecated_cast']}({call_name})"
+            elif x["offload"]:
                 call_name = call_name + "_"
             elif "recast" in x:
                 call_name = "* " + call_name + "__"

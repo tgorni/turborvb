@@ -39,8 +39,12 @@ default_definitions(cw)
 
 add_complex(cw)
 
-b_cublas = True
+b_cublas = False
+b_cublas_v2 = True
 b_cusolver = True
+
+if b_cublas and b_cublas_v2:
+    raise RuntimeError("b_cublas and b_cublas_v2 cannot be both True, choose one of them")
 
 if b_cublas:
     from datapack import cublas
@@ -57,18 +61,45 @@ if b_cublas:
     for entry in cublas:
         add_this(cw, entry)
 
-if b_cublas:
+if b_cublas_v2:
+    from datapack import cublas_v2
+    from basics import ( add_cudasync,
+                         add_cublas_handle_init,
+                         add_cublas_handle_destroy,
+                         add_cublas_types,
+                       )
+
+    cw.start_if_def(f"_CUBLAS")
+    cw.include("<cublas_v2.h>")
+    cw.end_if_def()
+
+    cw.start_if_def(f"_CUBLAS")
+    add_cublas_handle_init(cw)
+    add_cublas_handle_destroy(cw)
+    cw.end_if_def()
+
+    cw.start_if_def(f"_CUBLAS")
+    add_cudasync(cw)
+    cw.end_if_def()
+
+    cw.start_if_def(f"_CUBLAS")
+    add_cublas_types(cw)
+    cw.end_if_def()
+
+    for entry in cublas_v2:
+        add_this(cw, entry)
+
+if b_cusolver:
     from datapack import cusolver
+    from basics import ( add_cusolver_handle_init,
+                         add_cusolver_handle_destroy,
+                       )
 
     cw.start_if_def(f"_CUSOLVER")
     cw.include('"cusolverDn.h"')
     cw.end_if_def()
 
     cw.start_if_def(f"_CUSOLVER")
-    from basics import ( add_cusolver_handle_init,
-                         add_cusolver_handle_destroy,
-                       )
-
     add_cusolver_handle_init(cw)
     add_cusolver_handle_destroy(cw)
     cw.end_if_def()

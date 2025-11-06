@@ -57,6 +57,29 @@ def add_cudasync(cw):
     fun.add_code("cudaDeviceSynchronize();")
     cw.add_function_definition(fun)
 
+def add_cublas_handle_init(cw):
+    fun = cs.Function("cublas_handle_init_",
+                      "void",
+                      arguments = [ cs.Variable("handle",
+                                                "long int *")])
+    fun.add_code(("cublasHandle_t *h;",
+                  "h = (cublasHandle_t*) malloc(sizeof(cublasHandle_t));",
+                  "cublasCreate(h);",
+                  "*handle = (long int) h;",
+                 ))
+    cw.add_function_definition(fun)
+
+def add_cublas_handle_destroy(cw):
+    fun = cs.Function("cublas_handle_destroy_",
+                      "void",
+                      arguments = [ cs.Variable("handle",
+                                                "long int *")])
+    fun.add_code(("cublasHandle_t *h = (cublasHandle_t *) *handle;",
+                  "cublasDestroy(*h);",
+                  "free(h);",
+                 ))
+    cw.add_function_definition(fun)
+
 def add_cusolver_handle_init(cw):
     fun = cs.Function("cusolver_handle_init_",
                       "void",
@@ -80,10 +103,65 @@ def add_cusolver_handle_destroy(cw):
                  ))
     cw.add_function_definition(fun)
 
+def add_cublas_types(cw):
+
+    fun = cs.Function("cublas_op_type",
+                      "cublasOperation_t",
+                      arguments = [ cs.Variable("blas_op_type", "const char *")])
+    fun.add_code(("if (*blas_op_type == 'N') return CUBLAS_OP_N;",
+                  "if (*blas_op_type == 'n') return CUBLAS_OP_N;",
+                  "if (*blas_op_type == 'T') return CUBLAS_OP_T;",
+                  "if (*blas_op_type == 't') return CUBLAS_OP_T;",
+                  "if (*blas_op_type == 'C') return CUBLAS_OP_C;",
+                  "if (*blas_op_type == 'c') return CUBLAS_OP_C;",
+                  "printf(\"WARNING: unrecognized blas_op_type\\n\");",
+                  "return -1;"))
+    cw.add_function_definition(fun)
+
+    fun = cs.Function("cublas_side_type",
+                      "cublasSideMode_t",
+                      arguments = [ cs.Variable("blas_side_type", "const char *")])
+
+    fun.add_code(("if (*blas_side_type == 'R') return CUBLAS_SIDE_RIGHT;",
+                  "if (*blas_side_type == 'r') return CUBLAS_SIDE_RIGHT;",
+                  "if (*blas_side_type == 'L') return CUBLAS_SIDE_LEFT;",
+                  "if (*blas_side_type == 'l') return CUBLAS_SIDE_LEFT;",
+                  "printf(\"WARNING: unrecognized blas_side_type\\n\");",
+                  "return -1;"))
+
+    cw.add_function_definition(fun)
+
+    fun = cs.Function("cublas_fill_type",
+                      "cublasFillMode_t",
+                      arguments = [ cs.Variable("blas_fill_type", "const char *")])
+
+    fun.add_code(("if (*blas_fill_type == 'U') return CUBLAS_FILL_MODE_UPPER;",
+                  "if (*blas_fill_type == 'u') return CUBLAS_FILL_MODE_UPPER;",
+                  "if (*blas_fill_type == 'L') return CUBLAS_FILL_MODE_LOWER;",
+                  "if (*blas_fill_type == 'l') return CUBLAS_FILL_MODE_LOWER;",
+                  "printf(\"WARNING: unrecognized blas_fill_type\\n\");",
+                  "return -1;"))
+
+    cw.add_function_definition(fun)
+
+    fun = cs.Function("cublas_diag_type",
+                      "cublasDiagType_t",
+                      arguments = [ cs.Variable("blas_diag_type", "const char *")])
+
+    fun.add_code(("if (*blas_diag_type == 'U') return CUBLAS_DIAG_UNIT;",
+                  "if (*blas_diag_type == 'u') return CUBLAS_DIAG_UNIT;",
+                  "if (*blas_diag_type == 'N') return CUBLAS_DIAG_NON_UNIT;",
+                  "if (*blas_diag_type == 'n') return CUBLAS_DIAG_NON_UNIT;",
+                  "printf(\"WARNING: unrecognized blas_diag_type\\n\");",
+                  "return -1;"))
+          
+    cw.add_function_definition(fun)
+
 def default_includes(cw):
     cw.include("<stdlib.h>")
     cw.include("<stddef.h>")
     cw.include("<ctype.h>")
+    cw.include("<stdio.h>")
 
 def default_definitions(cw):
     cw.add_line("typedef size_t devptr_t;")
