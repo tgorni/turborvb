@@ -1,15 +1,13 @@
-# This workflow will build and test TurboRVB.
-
-name: TurboRVB linter-check, build, and test (Intel-oneapi, legacy)
+name: TurboRVB (Intel classic icc/ifort + MKL + IntelMPI)
 
 on:
   push:
     branches: [ "main", "devel" ]
   pull_request:
     branches: [ "main", "devel" ]
- 
+
 jobs:
-  intel-oneapi-legacy-test:
+  intelclassic-mkl-intelmpi:
     runs-on: ubuntu-latest
     env:
       CC: icx
@@ -42,13 +40,13 @@ jobs:
     - name: Install and Setup Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8
+        python-version: 3.11
 
     - name: Install python dependencies
       run: pip install numpy scipy pandas
 
     - name: Checkout the project repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Setup Intel oneAPI environment
       run: |

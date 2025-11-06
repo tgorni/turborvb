@@ -1,0 +1,98 @@
+name: TurboRVB (GCC + MKL + OpenMPI)
+
+on:
+  push:
+    branches: [ "main", "devel" ]
+  pull_request:
+    branches: [ "main", "devel" ]
+
+jobs:
+  gcc-mkl-openmpi:
+    runs-on: ubuntu-22.04
+    env:
+      OMP_NUM_THREADS: 2
+      OMPI_MCA_rmaps_base_oversubscribe: "1"
+      OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Add Intel oneAPI APT repository
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+
+      - name: Install GCC, OpenMPI, MKL
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            gcc g++ gfortran cmake pkg-config \
+            openmpi-bin libopenmpi-dev \
+            intel-oneapi-mkl python3-pip
+          python -m pip install --upgrade pip
+          pip install numpy scipy pandas
+          # Export MKLROOT and other env vars
+          bash -lc 'source /opt/intel/oneapi/setvars.sh && printenv >> $GITHUB_ENV'
+
+      - name: Lint
+        run: python ./devel_tools/run_linter.py .
+
+      - name: "Configure (CMake, robust MKL detection: gf -> rt fallback)"
+        shell: bash
+        # Stabilize MKL behavior in CI
+        env:
+            CC: mpicc
+            CXX: mpicxx
+            FC: mpifort
+            MKL_INTERFACE_LAYER: "LP64"
+            MKL_THREADING_LAYER: "SEQUENTIAL"
+            MKL_NUM_THREADS: "1"
+            OMPI_MCA_rmaps_base_oversubscribe: "1"
+            OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+        run: |
+            set -euxo pipefail
+            : "${MKLROOT:?MKLROOT is not set (source setvars.sh earlier)}"
+        
+            CANDIDATES=("$MKLROOT/lib/intel64" "$MKLROOT/lib")
+            MKL_LIBDIR=""
+            for d in "${CANDIDATES[@]}"; do
+            if [ -f "$d/libmkl_gf_lp64.so" ] || [ -f "$d/libmkl_rt.so" ]; then
+                MKL_LIBDIR="$d"; break
+            fi
+            done
+            if [ -z "$MKL_LIBDIR" ]; then
+            echo "MKL libraries not found under $MKLROOT" >&2
+            exit 1
+            fi
+        
+            if [ -f "$MKL_LIBDIR/libmkl_gf_lp64.so" ]; then
+            echo "Using MKL GNU Fortran interface (gf + core + sequential) from $MKL_LIBDIR"
+            BLAS_LIBS="$MKL_LIBDIR/libmkl_gf_lp64.so;$MKL_LIBDIR/libmkl_core.so;$MKL_LIBDIR/libmkl_sequential.so"
+            else
+            echo "Falling back to MKL single dynamic library (libmkl_rt) from $MKL_LIBDIR"
+            BLAS_LIBS="$MKL_LIBDIR/libmkl_rt.so;-lpthread;-lm;-ldl"
+            fi
+        
+            echo "LD_LIBRARY_PATH=$MKL_LIBDIR:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+        
+            cmake -S . -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DEXT_PARALLEL=ON \
+            -DBLA_VENDOR=Generic \
+            -DBLAS_LIBRARIES="$BLAS_LIBS" \
+            -DLAPACK_LIBRARIES="$BLAS_LIBS" \
+            -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed"
+
+      - name: Build
+        run: cmake --build build -j 2
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
